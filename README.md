@@ -1,1 +1,2 @@
-# stuttgart-things/machineShopOperator
+# stuttgart-things/machine-shop-operator
+
