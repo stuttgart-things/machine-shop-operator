@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - machineshop.sthings.tiab.ssc.sva.de
+  resources:
+  - terraforms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - machineshop.sthings.tiab.ssc.sva.de
+  resources:
+  - terraforms/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - machineshop.sthings.tiab.ssc.sva.de
+  resources:
+  - terraforms/status
+  verbs:
+  - get
+  - patch
+  - update
