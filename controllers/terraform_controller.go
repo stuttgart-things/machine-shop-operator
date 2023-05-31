@@ -19,10 +19,12 @@ package controllers
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	machineshopv1beta1 "github.com/stuttgart-things/machine-shop-operator/api/v1beta1"
 )
@@ -32,6 +34,8 @@ type TerraformReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
+
+const regexPatternVaultSecretPath = `.+/data/.+:.+`
 
 //+kubebuilder:rbac:groups=machineshop.sthings.tiab.ssc.sva.de,resources=terraforms,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=machineshop.sthings.tiab.ssc.sva.de,resources=terraforms/status,verbs=get;update;patch
@@ -49,7 +53,20 @@ type TerraformReconciler struct {
 func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	log := ctrllog.FromContext(ctx)
+	log.Info("⚡️ Event received! ⚡️")
+	log.Info("Request: ", "req", req)
+
+	terraformCR := &machineshopv1beta1.Terraform{}
+	err := r.Get(ctx, req.NamespacedName, terraformCR)
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("Terraform resource not found...")
+		} else {
+			log.Info("Error", err)
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
