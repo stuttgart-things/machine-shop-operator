@@ -1,0 +1,10 @@
+apiVersion: v2
+name: machine-shop-operator
+description: A Helm chart for Kubernetes
+type: application
+version: v0.1.131
+appVersion: v0.1.131
+dependencies:
+  - name: sthings-helm-toolkit
+    version: v0.1.125
+    repository: oci://eu.gcr.io/stuttgart-things
