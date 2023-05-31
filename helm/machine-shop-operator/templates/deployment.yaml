@@ -1,0 +1,2 @@
+{{- $envVar := . -}}
+{{ include "sthings-helm-toolkit.deployment" (list $envVar) }}
