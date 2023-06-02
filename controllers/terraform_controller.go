@@ -18,7 +18,13 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"strings"
 
+	"github.com/hashicorp/terraform-exec/tfexec"
+	sthingsBase "github.com/stuttgart-things/sthingsBase"
+	sthingsCli "github.com/stuttgart-things/sthingsCli"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -68,6 +74,96 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}
 
+	// GET VARIABLES FROM CR
+	var tfVersion string = terraformCR.Spec.TerraformVersion
+	var template string = terraformCR.Spec.Template
+	var module []string = terraformCR.Spec.Module
+	var backend []string = terraformCR.Spec.Backend
+	var secrets []string = terraformCR.Spec.Secrets
+	var variables []string = terraformCR.Spec.Variables
+	var workingDir = "/tmp/tf/" + req.Name + "/"
+	var tfInitOptions []tfexec.InitOption
+	var applyOptions []tfexec.ApplyOption
+
+	// GET MODULE PARAMETER
+	moduleParameter := make(map[string]interface{})
+	for _, s := range module {
+		keyValue := strings.Split(s, "=")
+		moduleParameter[keyValue[0]] = keyValue[1]
+	}
+
+	// CHECK FOR VAULT ENV VARS
+	vaultAuthType, vaultAuthFound := verifyVaultEnvVars()
+	log.Info("⚡️ VAULT CREDENDITALS ⚡️", vaultAuthType, vaultAuthFound)
+
+	if vaultAuthType == "approle" {
+		client, err := sthingsCli.CreateVaultClient()
+
+		if err != nil {
+			log.Error(err, "token creation (by approle) not working")
+		}
+
+		token, err := client.GetVaultTokenFromAppRole()
+
+		if err != nil {
+			log.Error(err, "token creation (by approle) not working")
+		}
+
+		os.Setenv("VAULT_TOKEN", token)
+	}
+
+	// CONVERT ALL EXISTING SECRETS IN BACKEND+MODULE PARAMETERS
+	backend = convertVaultSecretsInParameters(backend)
+	secrets = convertVaultSecretsInParameters(secrets)
+
+	// PRINT OUT CR
+	fmt.Println("CR-NAME", req.Name)
+
+	// READ + RENDER TF MODULE TEMPLATE
+	moduleCallTemplate := sthingsBase.ReadFileToVariable("terraform/" + template)
+	log.Info("⚡️ Rendering tf config ⚡️")
+	renderedModuleCall, _ := sthingsBase.RenderTemplateInline(string(moduleCallTemplate), "missingkey=zero", "{{", "}}", moduleParameter)
+
+	// CREATE TF FILES
+	log.Info("⚡️ CREATING WORKING DIR AND PROJECT FILES ⚡️")
+	sthingsBase.CreateNestedDirectoryStructure(workingDir, 0777)
+	sthingsBase.StoreVariableInFile(workingDir+req.Name+".tf", string(renderedModuleCall))
+	sthingsBase.StoreVariableInFile(workingDir+"terraform.tfvars", strings.Join(variables, "\n"))
+
+	// TERRAFORM INIT
+	tf := initalizeTerraform(workingDir, tfVersion)
+	log.Info("⚡️ INITALIZE TERRAFORM ⚡️")
+	tfInitOptions = append(tfInitOptions, tfexec.Upgrade(true))
+
+	for _, backendParameter := range backend {
+		tfInitOptions = append(tfInitOptions, tfexec.BackendConfig(strings.TrimSpace(backendParameter)))
+	}
+
+	err = tf.Init(context.Background(), tfInitOptions...)
+
+	if err != nil {
+		fmt.Println("ERROR RUNNING INIT: %s", err)
+	}
+
+	log.Info("⚡️ INITALIZING OF TERRAFORM DONE ⚡️")
+
+	// TERRAFORM APPLY
+	log.Info("⚡️ APPLYING.. ⚡️")
+	for _, secret := range secrets {
+		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
+	}
+
+	err = tf.Apply(context.Background(), applyOptions...)
+
+	if err != nil {
+		fmt.Println("ERROR RUNNING APPLY: %s", err)
+	}
+
+	tf.SetStdout(os.Stdout)
+	tf.SetStderr(os.Stderr)
+
+	log.Info("TF APPLY DONE!")
+
 	return ctrl.Result{}, nil
 }
 
@@ -76,4 +172,56 @@ func (r *TerraformReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&machineshopv1beta1.Terraform{}).
 		Complete(r)
+}
+
+func verifyVaultEnvVars() (string, bool) {
+
+	if sthingsCli.VerifyEnvVars([]string{"VAULT_ADDR", "VAULT_ROLE_ID", "VAULT_SECRET_ID", "VAULT_NAMESPACE"}) {
+		return "approle", true
+	} else if sthingsCli.VerifyEnvVars([]string{"VAULT_ADDR", "VAULT_TOKEN", "VAULT_NAMESPACE"}) {
+		return "token", true
+	} else {
+		return "missing", false
+	}
+
+}
+
+func initalizeTerraform(terraformDir, terraformVersion string) (tf *tfexec.Terraform) {
+
+	installer := &releases.ExactVersion{
+		Product: product.Terraform,
+		Version: version.Must(version.NewVersion(terraformVersion)),
+	}
+
+	execPath, err := installer.Install(context.Background())
+	if err != nil {
+		fmt.Println("Error installing Terraform: %s", err)
+	}
+
+	tf, err = tfexec.NewTerraform(terraformDir, execPath)
+	if err != nil {
+		fmt.Println("Error running Terraform: %s", err)
+	}
+
+	return
+
+}
+
+func convertVaultSecretsInParameters(parameters []string) (updatedParameters []string) {
+
+	for _, parameter := range parameters {
+
+		kvParameter := strings.Split(parameter, "=")
+		updatedParameter := parameter
+
+		if len(sthingsBase.GetAllRegexMatches(kvParameter[1], regexPatternVaultSecretPath)) > 0 {
+			secretValue := sthingsCli.GetVaultSecretValue(kvParameter[1], os.Getenv("VAULT_TOKEN"))
+			updatedParameter = kvParameter[0] + "=" + secretValue
+		}
+
+		updatedParameters = append(updatedParameters, updatedParameter)
+
+	}
+
+	return
 }
