@@ -1,6 +1,4 @@
----
 namespace: machine-shop-operator-system
-
 secrets:
   vault:
     name: vault
@@ -14,7 +12,6 @@ secrets:
       VAULT_TOKEN: <path:apps/data/vault#token>
       VAULT_NAMESPACE: <path:apps/data/vault#namespace>
       VAULT_ADDR: <path:apps/data/vault#addr>
-
 configmaps:
   terraform-templates:
     vsphere-vm: |
@@ -324,7 +321,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: 23.0512.1215-v0.1.131
+      tag: 23.0603.0838-v0.1.5
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
