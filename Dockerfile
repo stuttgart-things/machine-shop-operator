@@ -49,6 +49,7 @@ RUN apt update -qqq && \
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/manager .
+COPY --from=cert-env /etc/ssl/certs /etc/ssl/certs
 USER 65532:65532
 
 ENTRYPOINT ["/manager"]
