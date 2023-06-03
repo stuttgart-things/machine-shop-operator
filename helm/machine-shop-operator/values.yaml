@@ -1,17 +1,17 @@
 namespace: machine-shop-operator-system
-secrets:
-  vault:
-    name: vault
-    labels:
-      app.kubernetes.io/component: manager
-      app.kubernetes.io/created-by: machine-shop-operator
-      app.kubernetes.io/instance: controller-manager
-      app.kubernetes.io/part-of: machine-shop-operator
-    dataType: stringData
-    secretKVs:
-      VAULT_TOKEN: <path:apps/data/vault#token>
-      VAULT_NAMESPACE: <path:apps/data/vault#namespace>
-      VAULT_ADDR: <path:apps/data/vault#addr>
+# secrets:
+#   vault:
+#     name: vault
+#     labels:
+#       app.kubernetes.io/component: manager
+#       app.kubernetes.io/created-by: machine-shop-operator
+#       app.kubernetes.io/instance: controller-manager
+#       app.kubernetes.io/part-of: machine-shop-operator
+#     dataType: stringData
+#     secretKVs:
+#       VAULT_TOKEN: <path:apps/data/vault#token>
+#       VAULT_NAMESPACE: <path:apps/data/vault#namespace>
+#       VAULT_ADDR: <path:apps/data/vault#addr>
 configmaps:
   terraform-templates:
     vsphere-vm: |
@@ -321,7 +321,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: 23.0603.0838-v0.1.5
+      tag: 23.0603.1120-v0.1.6
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
