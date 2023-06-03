@@ -321,7 +321,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: 23.0603.1120-v0.1.6
+      tag: 23.0603.1356-v0.1.7
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
@@ -513,7 +513,7 @@ clusterRoles:
       app.kubernetes.io/part-of: machine-shop-operator
     rules:
       - apiGroups:
-          - shipyard.sthings.tiab.ssc.sva.de
+          - machineshop.sthings.tiab.ssc.sva.de
         resources:
           - ansibles
         verbs:
@@ -535,13 +535,13 @@ clusterRoles:
           - watch
           - create
       - apiGroups:
-          - shipyard.sthings.tiab.ssc.sva.de
+          - machineshop.sthings.tiab.ssc.sva.de
         resources:
           - ansibles/finalizers
         verbs:
           - update
       - apiGroups:
-          - shipyard.sthings.tiab.ssc.sva.de
+          - machineshop.sthings.tiab.ssc.sva.de
         resources:
           - ansibles/status
         verbs:
@@ -549,9 +549,9 @@ clusterRoles:
           - patch
           - update
       - apiGroups:
-          - shipyard.sthings.tiab.ssc.sva.de
+          - machineshop.sthings.tiab.ssc.sva.de
         resources:
-          - shipyardterraforms
+          - terraforms
         verbs:
           - create
           - delete
@@ -561,15 +561,15 @@ clusterRoles:
           - update
           - watch
       - apiGroups:
-          - shipyard.sthings.tiab.ssc.sva.de
+          - machineshop.sthings.tiab.ssc.sva.de
         resources:
-          - shipyardterraforms/finalizers
+          - terraforms/finalizers
         verbs:
           - update
       - apiGroups:
-          - shipyard.sthings.tiab.ssc.sva.de
+          - machineshop.sthings.tiab.ssc.sva.de
         resources:
-          - shipyardterraforms/status
+          - terraforms/status
         verbs:
           - get
           - patch
