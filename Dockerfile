@@ -23,7 +23,7 @@ COPY controllers/ controllers/
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o manager main.go
 
-ROM debian AS cert-env
+FROM debian AS cert-env
 
 # Add CA files
 ARG VAULT_URL_LABUL=https://vault.labul.sva.de:8200
