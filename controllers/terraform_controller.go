@@ -165,7 +165,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	fileWriter := CreateFileLogger("/tmp/machineShop.log")
-
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
 
