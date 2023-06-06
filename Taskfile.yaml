@@ -1,6 +1,5 @@
 ---
 version: 3
-
 vars:
   REGISTRY: eu.gcr.io
   REPOSITORY_NAME: stuttgart-things
