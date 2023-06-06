@@ -152,6 +152,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// TERRAFORM APPLY
 	log.Info("⚡️ APPLYING.. ⚡️")
+
 	for _, secret := range secrets {
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
@@ -159,7 +160,8 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	err = tf.Apply(context.Background(), applyOptions...)
 
 	if err != nil {
-		fmt.Println("ERROR RUNNING APPLY: %s", err)
+		// fmt.Println("ERROR RUNNING APPLY: %s", err)
+		log.Error(err, "TF APPLY ABORTED!")
 	}
 
 	tf.SetStdout(os.Stdout)
