@@ -62,7 +62,7 @@ tasks:
       - git config advice.addIgnoredFile false
       - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }} '
       - git push
-      - git tag -a {{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }} '
+      - git tag -a {{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }}'
       - git push origin --tags
 
   build-image:
