@@ -113,8 +113,8 @@ tasks:
     desc: Push to registry
     deps: [build-image, package]
     cmds:
-      - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }} .tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
-      - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }} .tgz
+      - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
+      - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz
     vars:
       PACKAGE:
         sh: "ls *tgz* -Art | tail -n 1"
