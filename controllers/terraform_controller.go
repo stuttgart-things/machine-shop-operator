@@ -164,8 +164,10 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Error(err, "TF APPLY ABORTED!")
 	}
 
-	tf.SetStdout(os.Stdout)
-	tf.SetStderr(os.Stderr)
+	fileWriter := CreateFileLogger("/tmp/machineShop.log")
+
+	tf.SetStdout(fileWriter)
+	tf.SetStderr(fileWriter)
 
 	log.Info("TF APPLY DONE!")
 
@@ -226,6 +228,16 @@ func convertVaultSecretsInParameters(parameters []string) (updatedParameters []s
 
 		updatedParameters = append(updatedParameters, updatedParameter)
 
+	}
+
+	return
+}
+
+func CreateFileLogger(filepath string) (filewWiter *os.File) {
+
+	filewWiter, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	if err != nil {
+		panic(err)
 	}
 
 	return
