@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: machine-shop-operator-dev
+  namespace: argocd
+spec:
+  destination:
+    name: dev8
+    namespace: machine-shop-operator-system
+    # server: 'https://10.100.136.143:6443'
+  source:
+    path: helm/machine-shop-operator
+    repoURL: 'https://github.com/stuttgart-things/machine-shop-operator.git'
+    targetRevision: TF-OUTPUT-LOG
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: deployment.containers.manager.secretsEnvFrom[0].name
+          value: vault
+  sources: []
+  project: dev8
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
