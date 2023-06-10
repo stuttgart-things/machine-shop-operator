@@ -20,7 +20,7 @@ spec:
         - name: deployment.containers.manager.secretsEnvFrom[0].name
           value: vault
   sources: []
-  project: dev8
+  project: app
   syncPolicy:
     automated:
       prune: false
