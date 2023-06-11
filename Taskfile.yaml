@@ -108,14 +108,9 @@ tasks:
       - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }}"' ./helm/*/values.yaml
       - helm package ./helm/*/
 
-  deployment:
-    desc: Update deployment definition
-    cmds:
-      - yq e -i '.spec.source.targetRevision = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }}"' .argocd/deployment.yaml
-
   push:
     desc: Push to registry
-    deps: [build-image, package, deployment]
+    deps: [build-image, package]
     cmds:
       - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
       - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz
