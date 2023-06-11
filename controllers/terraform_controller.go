@@ -44,6 +44,10 @@ type TerraformReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+var (
+	logfilePath string
+)
+
 const regexPatternVaultSecretPath = `.+/data/.+:.+`
 
 //+kubebuilder:rbac:groups=machineshop.sthings.tiab.ssc.sva.de,resources=terraforms,verbs=get;list;watch;create;update;patch;delete
@@ -157,7 +161,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
 
-	fileWriter := CreateFileLogger("/tmp/machineShop.log")
+	fileWriter := CreateFileLogger(logfilePath + "/" + req.Name + ".log")
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
 
@@ -170,7 +174,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	log.Info("TF APPLY DONE!")
 
-	logfileTest := sthingsBase.ReadFileToVariable("/tmp/machineShop.log")
+	logfileTest := sthingsBase.ReadFileToVariable(logfilePath + "/" + req.Name + ".log")
 	fmt.Println("LOGFILE TEST")
 	fmt.Println(logfileTest)
 
