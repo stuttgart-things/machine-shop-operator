@@ -1,10 +1,9 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: machine-shop-operator-testvm
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-4"
 spec:
   project: app
   destination:
@@ -33,7 +32,7 @@ spec:
                     app.kubernetes.io/created-by: machine-shop-operator
                 spec:
                   variables:
-                    - vsphere_vm_name="mso-testvm"
+                    - vsphere_vm_name="mso-testvm1"
                     - vm_count=1
                     - vm_num_cpus=6
                     - vm_memory=8192
