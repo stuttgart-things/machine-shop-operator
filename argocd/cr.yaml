@@ -24,7 +24,7 @@ spec:
                 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
                 kind: Terraform
                 metadata:
-                  name: rancher-application-server-ingress
+                  name: mso-testvm2
                   namespace: machine-shop-operator-system
                   labels:
                     app.kubernetes.io/name: terraform
@@ -32,7 +32,7 @@ spec:
                     app.kubernetes.io/created-by: machine-shop-operator
                 spec:
                   variables:
-                    - vsphere_vm_name="mso-testvm1"
+                    - vsphere_vm_name="mso-testvm2"
                     - vm_count=1
                     - vm_num_cpus=6
                     - vm_memory=8192
@@ -44,16 +44,16 @@ spec:
                     - vsphere_resource_pool="Resources"
                     - vsphere_datacenter="/NetApp-HCI-Datacenter"
                   module:
-                    - moduleName=mso-testvm
-                    - backendKey=mso-testvm.tfstate
+                    - moduleName=mso-testvm2
+                    - backendKey=mso-testvm2.tfstate
                     - moduleSourceUrl=https://artifacts.tiab.labda.sva.de/modules/vsphere-vm.zip
                     - backendEndpoint=https://artifacts.app.4sthings.tiab.ssc.sva.de
                     - backendRegion=main
                     - backendBucket=vsphere-vm
                     - tfProviderName=vsphere
                     - tfProviderSource=hashicorp/vsphere
-                    - tfProviderVersion=2.3.1
-                    - tfVersion=1.4.5
+                    - tfProviderVersion=2.4.0
+                    - tfVersion=1.4.6
                   backend:
                     - access_key=apps/data/artifacts:accessKey
                     - secret_key=apps/data/artifacts:secretKey
