@@ -157,16 +157,16 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
 
+	fileWriter := CreateFileLogger("/tmp/machineShop.log")
+	tf.SetStdout(fileWriter)
+	tf.SetStderr(fileWriter)
+
 	err = tf.Apply(context.Background(), applyOptions...)
 
 	if err != nil {
 		// fmt.Println("ERROR RUNNING APPLY: %s", err)
 		log.Error(err, "TF APPLY ABORTED!")
 	}
-
-	fileWriter := CreateFileLogger("/tmp/machineShop.log")
-	tf.SetStdout(fileWriter)
-	tf.SetStderr(fileWriter)
 
 	log.Info("TF APPLY DONE!")
 
