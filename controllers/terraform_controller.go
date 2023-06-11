@@ -170,6 +170,10 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	log.Info("TF APPLY DONE!")
 
+	logfileTest := sthingsBase.ReadFileToVariable("/tmp/machineShop.log")
+	fmt.Println("LOGFILE TEST")
+	fmt.Println(logfileTest)
+
 	return ctrl.Result{}, nil
 }
 
