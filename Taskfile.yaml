@@ -113,6 +113,7 @@ tasks:
     deps: [build-image, package]
     cmds:
       - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
+      - yq e -i '.spec.source.targetRevision = "{{ .UPDATED_TAG_VERSION }}"' argocd/deployment.yaml
       - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz
     vars:
       PACKAGE:
