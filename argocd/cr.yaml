@@ -34,7 +34,7 @@ spec:
                   variables:
                     - vsphere_vm_name="mso-testvm2"
                     - vm_count=1
-                    - vm_num_cpus=6
+                    - vm_num_cpus=4
                     - vm_memory=8192
                     - vm_disk_size=96
                     - vsphere_vm_template="/NetApp-HCI-Datacenter/vm/stuttgart-things/vm-templates/rocky9"
