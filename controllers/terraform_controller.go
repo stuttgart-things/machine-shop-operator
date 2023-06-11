@@ -45,7 +45,7 @@ type TerraformReconciler struct {
 }
 
 var (
-	logfilePath string
+	logfilePath = "/tmp"
 )
 
 const regexPatternVaultSecretPath = `.+/data/.+:.+`
@@ -161,6 +161,11 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
 
+	e := os.Remove(logfilePath + "/" + req.Name + ".log")
+	if e != nil {
+		fmt.Println(e)
+	}
+
 	fileWriter := CreateFileLogger(logfilePath + "/" + req.Name + ".log")
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
@@ -177,6 +182,9 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	logfileTest := sthingsBase.ReadFileToVariable(logfilePath + "/" + req.Name + ".log")
 	fmt.Println("LOGFILE TEST")
 	fmt.Println(logfileTest)
+
+	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileTest, `Apply complete`)
+	fmt.Println(applyStatus)
 
 	return ctrl.Result{}, nil
 }
