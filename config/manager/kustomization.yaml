@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: eu.gcr.io/stuttgart-things/machine-shop-operator
-  newTag: 23.0612.0622-v0.1.38-TF-OUTPUT-LOG
+  newTag: 23.0612.0727-v0.1.39-TF-OUTPUT-LOG
