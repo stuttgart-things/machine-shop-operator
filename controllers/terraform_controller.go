@@ -183,11 +183,19 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	log.Info("TF APPLY DONE!")
 
+	// EXTRACT LOGGING INFORMATION
 	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
 	fmt.Println(logfileApplyOperation)
 
 	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `(.*(?:Apply complete).*)`)
 	fmt.Println(applyStatus)
+
+	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
+		s := strings.Split(logfileApplyOperation, "Outputs:")
+		fmt.Println("outputInformation:")
+		outputInformation, _ := sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
+		fmt.Println(strings.Replace(outputInformation, ",", "", -1))
+	}
 
 	return ctrl.Result{}, nil
 }
