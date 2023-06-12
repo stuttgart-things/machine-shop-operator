@@ -186,7 +186,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
 	fmt.Println(logfileApplyOperation)
 
-	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `Apply complete`)
+	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `^.*\b(complete)\b.*$`)
 	fmt.Println(applyStatus)
 
 	return ctrl.Result{}, nil
