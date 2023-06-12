@@ -13,6 +13,9 @@ namespace: machine-shop-operator-system
 #       VAULT_NAMESPACE: <path:apps/data/vault#namespace>
 #       VAULT_ADDR: <path:apps/data/vault#addr>
 configmaps:
+  environment:
+    ENABLE_WEBHOOK: no
+    WEBHOOK_URL: ""
   terraform-templates:
     vsphere-vm: |
       module "{{`{{ .moduleName }}`}}" {
@@ -321,7 +324,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: 23.0603.1451-v0.1.11
+      tag: '23.0612.1116-v0.1.48-TF-OUTPUT-LOG'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:

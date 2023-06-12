@@ -78,15 +78,23 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// GET VARIABLES FROM CR
-	var tfVersion string = terraformCR.Spec.TerraformVersion
-	var template string = terraformCR.Spec.Template
-	var module []string = terraformCR.Spec.Module
-	var backend []string = terraformCR.Spec.Backend
-	var secrets []string = terraformCR.Spec.Secrets
-	var variables []string = terraformCR.Spec.Variables
-	var workingDir = "/tmp/tf/" + req.Name + "/"
-	var tfInitOptions []tfexec.InitOption
-	var applyOptions []tfexec.ApplyOption
+	var (
+		tfVersion     string   = terraformCR.Spec.TerraformVersion
+		template      string   = terraformCR.Spec.Template
+		module        []string = terraformCR.Spec.Module
+		backend       []string = terraformCR.Spec.Backend
+		secrets       []string = terraformCR.Spec.Secrets
+		variables     []string = terraformCR.Spec.Variables
+		tfInitOptions []tfexec.InitOption
+		applyOptions  []tfexec.ApplyOption
+	)
+
+	// WORKING DIRS
+	var (
+		logfilePath       = "/tmp/" + req.Name + ".log"
+		workingDir        = "/tmp/tf/" + req.Name + "/"
+		msTeamswebhookUrl = "https://365sva.webhook.office.com/webhookb2/2f14a9f8-4736-46dd-9c8c-31547ec37180@0a65cb1e-37d5-41ff-980a-647d9d0e4f0b/IncomingWebhook/a993544595464ce6af4f2f0461d55a17/dc3a27ed-396c-40b7-a9b2-f1a2b6b44efe"
+	)
 
 	// GET MODULE PARAMETER
 	moduleParameter := make(map[string]interface{})
@@ -96,7 +104,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// CHECK FOR VAULT ENV VARS
-	vaultAuthType, vaultAuthFound := verifyVaultEnvVars()
+	vaultAuthType, vaultAuthFound := sthingsCli.VerifyVaultEnvVars()
 	log.Info("⚡️ VAULT CREDENDITALS ⚡️", vaultAuthType, vaultAuthFound)
 
 	if vaultAuthType == "approle" {
@@ -152,20 +160,56 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// TERRAFORM APPLY
 	log.Info("⚡️ APPLYING.. ⚡️")
+
 	for _, secret := range secrets {
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
 
+	// LOGFILE HANDLING
+	logFileExists, _ := sthingsBase.VerifyIfFileOrDirExists(logfilePath, "file")
+	if logFileExists {
+		sthingsBase.DeleteFile(logfilePath)
+	}
+
+	fileWriter := sthingsBase.CreateFileLogger(logfilePath)
+	tf.SetStdout(fileWriter)
+	tf.SetStderr(fileWriter)
+
 	err = tf.Apply(context.Background(), applyOptions...)
 
 	if err != nil {
-		fmt.Println("ERROR RUNNING APPLY: %s", err)
+		// fmt.Println("ERROR RUNNING APPLY: %s", err)
+		log.Error(err, "TF APPLY ABORTED!")
 	}
 
-	tf.SetStdout(os.Stdout)
-	tf.SetStderr(os.Stderr)
-
 	log.Info("TF APPLY DONE!")
+
+	// EXTRACT LOGGING INFORMATION
+	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
+	// fmt.Println(logfileApplyOperation)
+
+	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `(.*(?:Apply complete).*)`)
+	log.Info("TERRAFORM-STATUS: " + applyStatus)
+
+	var outputInformation string
+
+	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
+		s := strings.Split(logfileApplyOperation, "Outputs:")
+		fmt.Println("outputInformation:")
+		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
+		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
+		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
+		outputInformation = outputInformationWithoutQuotes
+		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
+	}
+
+	webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
+
+	sthingsCli.SendWebhookToTeams(webhook)
+	log.Info("WEBHOOK SENDED")
+
+	fmt.Println("FOO:", os.Getenv("ENABLE_WEBHOOK"))
+	fmt.Println("FOO:", os.Getenv("WEBHOOK_URL"))
 
 	return ctrl.Result{}, nil
 }
@@ -175,18 +219,6 @@ func (r *TerraformReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&machineshopv1beta1.Terraform{}).
 		Complete(r)
-}
-
-func verifyVaultEnvVars() (string, bool) {
-
-	if sthingsCli.VerifyEnvVars([]string{"VAULT_ADDR", "VAULT_ROLE_ID", "VAULT_SECRET_ID", "VAULT_NAMESPACE"}) {
-		return "approle", true
-	} else if sthingsCli.VerifyEnvVars([]string{"VAULT_ADDR", "VAULT_TOKEN", "VAULT_NAMESPACE"}) {
-		return "token", true
-	} else {
-		return "missing", false
-	}
-
 }
 
 func initalizeTerraform(terraformDir, terraformVersion string) (tf *tfexec.Terraform) {
