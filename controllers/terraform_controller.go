@@ -195,12 +195,16 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		s := strings.Split(logfileApplyOperation, "Outputs:")
 		fmt.Println("outputInformation:")
 		outputInformation, _ := sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
-		fmt.Println(strings.Replace(outputInformation, ",", "", -1))
+		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
+		outputInformationWithoutQoutes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
+		fmt.Println(strings.Replace(outputInformationWithoutQoutes, ",", "", -1))
 	}
 
 	webhook := sthingsCli.MsTeamsWebhook{Title: "machine-shop-operator", Text: "hello", Color: "#DF813D", Url: msTeamswebhookUrl}
+	fmt.Println(webhook)
 
 	sthingsCli.SendWebhookToTeams(webhook)
+	fmt.Println("WEBHOOK SENDED!")
 
 	return ctrl.Result{}, nil
 }
