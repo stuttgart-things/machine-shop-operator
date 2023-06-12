@@ -44,10 +44,6 @@ type TerraformReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-var (
-	logfilePath = "/tmp"
-)
-
 const regexPatternVaultSecretPath = `.+/data/.+:.+`
 
 //+kubebuilder:rbac:groups=machineshop.sthings.tiab.ssc.sva.de,resources=terraforms,verbs=get;list;watch;create;update;patch;delete
@@ -82,15 +78,22 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// GET VARIABLES FROM CR
-	var tfVersion string = terraformCR.Spec.TerraformVersion
-	var template string = terraformCR.Spec.Template
-	var module []string = terraformCR.Spec.Module
-	var backend []string = terraformCR.Spec.Backend
-	var secrets []string = terraformCR.Spec.Secrets
-	var variables []string = terraformCR.Spec.Variables
-	var workingDir = "/tmp/tf/" + req.Name + "/"
-	var tfInitOptions []tfexec.InitOption
-	var applyOptions []tfexec.ApplyOption
+	var (
+		tfVersion     string   = terraformCR.Spec.TerraformVersion
+		template      string   = terraformCR.Spec.Template
+		module        []string = terraformCR.Spec.Module
+		backend       []string = terraformCR.Spec.Backend
+		secrets       []string = terraformCR.Spec.Secrets
+		variables     []string = terraformCR.Spec.Variables
+		tfInitOptions []tfexec.InitOption
+		applyOptions  []tfexec.ApplyOption
+	)
+
+	// WORKING DIRS
+	var (
+		logfilePath = "/tmp/" + req.Name + ".log"
+		workingDir  = "/tmp/tf/" + req.Name + "/"
+	)
 
 	// GET MODULE PARAMETER
 	moduleParameter := make(map[string]interface{})
@@ -161,12 +164,13 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
 
-	e := os.Remove(logfilePath + "/" + req.Name + ".log")
-	if e != nil {
-		fmt.Println(e)
+	// LOGFILE HANDLING
+	logFileExists, _ := sthingsBase.VerifyIfFileOrDirExists(logfilePath, "file")
+	if logFileExists {
+		sthingsBase.DeleteFile(logfilePath)
 	}
 
-	fileWriter := CreateFileLogger(logfilePath + "/" + req.Name + ".log")
+	fileWriter := CreateFileLogger(logfilePath)
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
 
@@ -179,12 +183,11 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	log.Info("TF APPLY DONE!")
 
-	logfileTest := sthingsBase.ReadFileToVariable(logfilePath + "/" + req.Name + ".log")
-	fmt.Println("LOGFILE TEST")
-	fmt.Println(logfileTest)
+	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
+	fmt.Println(logfileApplyOperation)
 
-	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileTest, `Apply complete`)
-	fmt.Println(applyStatus)
+	// applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileTest, `Apply complete`)
+	// fmt.Println(applyStatus)
 
 	return ctrl.Result{}, nil
 }

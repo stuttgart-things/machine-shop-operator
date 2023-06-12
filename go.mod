@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-exec v0.18.1
 	github.com/onsi/ginkgo/v2 v2.9.5
 	github.com/onsi/gomega v1.27.7
-	github.com/stuttgart-things/sthingsBase v0.1.12
+	github.com/stuttgart-things/sthingsBase v0.1.14
 	github.com/stuttgart-things/sthingsCli v0.1.8
 	k8s.io/apimachinery v0.26.0
 	k8s.io/client-go v0.26.0
