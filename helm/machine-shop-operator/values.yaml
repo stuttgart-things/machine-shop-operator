@@ -321,7 +321,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0612.0556-v0.1.37-TF-OUTPUT-LOG'
+      tag: '23.0612.0622-v0.1.38-TF-OUTPUT-LOG'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
