@@ -200,7 +200,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
 		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
 		outputInformation = outputInformationWithoutQuotes
-		log.Info("OUTPUT", outputInformation)
+		log.Info("OUTPUTS: " + outputInformation)
 	}
 
 	webhook := sthingsCli.MsTeamsWebhook{Title: "machine-shop-operator", Text: applyStatus + "\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
