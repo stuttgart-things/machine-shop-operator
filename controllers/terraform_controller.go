@@ -186,25 +186,27 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// EXTRACT LOGGING INFORMATION
 	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
-	fmt.Println(logfileApplyOperation)
+	// fmt.Println(logfileApplyOperation)
 
 	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `(.*(?:Apply complete).*)`)
-	fmt.Println(applyStatus)
+	log.Info("TERRAFORM STATUS", applyStatus)
+
+	var outputInformation string
 
 	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
 		s := strings.Split(logfileApplyOperation, "Outputs:")
 		fmt.Println("outputInformation:")
-		outputInformation, _ := sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
+		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
 		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
-		outputInformationWithoutQoutes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
-		fmt.Println(strings.Replace(outputInformationWithoutQoutes, ",", "", -1))
+		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
+		outputInformation = outputInformationWithoutQuotes
+		log.Info("OUTPUT", outputInformation)
 	}
 
-	webhook := sthingsCli.MsTeamsWebhook{Title: "machine-shop-operator", Text: "hello", Color: "#DF813D", Url: msTeamswebhookUrl}
-	fmt.Println(webhook)
+	webhook := sthingsCli.MsTeamsWebhook{Title: "machine-shop-operator", Text: applyStatus + "\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
 
 	sthingsCli.SendWebhookToTeams(webhook)
-	fmt.Println("WEBHOOK SENDED!")
+	log.Info("WEBHOOK SENDED TO!", msTeamswebhookUrl)
 
 	return ctrl.Result{}, nil
 }
