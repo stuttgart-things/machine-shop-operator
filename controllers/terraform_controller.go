@@ -91,8 +91,9 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// WORKING DIRS
 	var (
-		logfilePath = "/tmp/" + req.Name + ".log"
-		workingDir  = "/tmp/tf/" + req.Name + "/"
+		logfilePath       = "/tmp/" + req.Name + ".log"
+		workingDir        = "/tmp/tf/" + req.Name + "/"
+		msTeamswebhookUrl = "https://365sva.webhook.office.com/webhookb2/2f14a9f8-4736-46dd-9c8c-31547ec37180@0a65cb1e-37d5-41ff-980a-647d9d0e4f0b/IncomingWebhook/a993544595464ce6af4f2f0461d55a17/dc3a27ed-396c-40b7-a9b2-f1a2b6b44efe"
 	)
 
 	// GET MODULE PARAMETER
@@ -196,6 +197,10 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		outputInformation, _ := sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
 		fmt.Println(strings.Replace(outputInformation, ",", "", -1))
 	}
+
+	webhook := sthingsCli.MsTeamsWebhook{Title: "machine-shop-operator", Text: "hello", Color: "#DF813D", Url: msTeamswebhookUrl}
+
+	sthingsCli.SendWebhookToTeams(webhook)
 
 	return ctrl.Result{}, nil
 }
