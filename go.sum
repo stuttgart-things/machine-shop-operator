@@ -415,10 +415,10 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.4/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
-github.com/stuttgart-things/sthingsBase v0.1.14 h1:qmFzJm61vLx7p+fyrXmTUGqxhh+cy3qhG27xwfR+92E=
-github.com/stuttgart-things/sthingsBase v0.1.14/go.mod h1:m8KEQVzuV5wwxg+G8OWb+YXOVp0ZRq3MeVUT3p5N8zc=
-github.com/stuttgart-things/sthingsCli v0.1.8 h1:d0RAfH3Y68If3dQXX1LklAzPOJrk/9oB5ZNyxK8GgGQ=
-github.com/stuttgart-things/sthingsCli v0.1.8/go.mod h1:+qXypFHVm6q3FF+Y/Q5UQpgjcDDIEKuRWC17CmJO+/E=
+github.com/stuttgart-things/sthingsBase v0.1.15 h1:OHN4ICDx+/4E212qSlqFxXm7kMXN58xlvb59a/T6+6g=
+github.com/stuttgart-things/sthingsBase v0.1.15/go.mod h1:m8KEQVzuV5wwxg+G8OWb+YXOVp0ZRq3MeVUT3p5N8zc=
+github.com/stuttgart-things/sthingsCli v0.1.9 h1:wNeUfRsjIg85qpJ9Kq5uxYpa2tUasb0Gv0VzzCuS3wo=
+github.com/stuttgart-things/sthingsCli v0.1.9/go.mod h1:+qXypFHVm6q3FF+Y/Q5UQpgjcDDIEKuRWC17CmJO+/E=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/vmihailenco/msgpack/v4 v4.3.12/go.mod h1:gborTTJjAo/GWTqqRjrLCn9pgNN+NXzzngzBKDPIqw4=
 github.com/vmihailenco/tagparser v0.1.1/go.mod h1:OeAg3pn3UbLjkWt+rN9oFYB6u/cQgqMEUPoW2WPyhdI=

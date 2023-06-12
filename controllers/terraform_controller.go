@@ -103,7 +103,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// CHECK FOR VAULT ENV VARS
-	vaultAuthType, vaultAuthFound := verifyVaultEnvVars()
+	vaultAuthType, vaultAuthFound := sthingsCli.VerifyVaultEnvVars()
 	log.Info("⚡️ VAULT CREDENDITALS ⚡️", vaultAuthType, vaultAuthFound)
 
 	if vaultAuthType == "approle" {
@@ -170,7 +170,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		sthingsBase.DeleteFile(logfilePath)
 	}
 
-	fileWriter := CreateFileLogger(logfilePath)
+	fileWriter := sthingsBase.CreateFileLogger(logfilePath)
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
 
@@ -197,18 +197,6 @@ func (r *TerraformReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&machineshopv1beta1.Terraform{}).
 		Complete(r)
-}
-
-func verifyVaultEnvVars() (string, bool) {
-
-	if sthingsCli.VerifyEnvVars([]string{"VAULT_ADDR", "VAULT_ROLE_ID", "VAULT_SECRET_ID", "VAULT_NAMESPACE"}) {
-		return "approle", true
-	} else if sthingsCli.VerifyEnvVars([]string{"VAULT_ADDR", "VAULT_TOKEN", "VAULT_NAMESPACE"}) {
-		return "token", true
-	} else {
-		return "missing", false
-	}
-
 }
 
 func initalizeTerraform(terraformDir, terraformVersion string) (tf *tfexec.Terraform) {
@@ -246,16 +234,6 @@ func convertVaultSecretsInParameters(parameters []string) (updatedParameters []s
 
 		updatedParameters = append(updatedParameters, updatedParameter)
 
-	}
-
-	return
-}
-
-func CreateFileLogger(filepath string) (filewWiter *os.File) {
-
-	filewWiter, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		panic(err)
 	}
 
 	return

@@ -1,6 +1,6 @@
 module github.com/stuttgart-things/machine-shop-operator
 
-go 1.19
+go 1.20
 
 require (
 	github.com/hashicorp/go-version v1.6.0
@@ -8,8 +8,8 @@ require (
 	github.com/hashicorp/terraform-exec v0.18.1
 	github.com/onsi/ginkgo/v2 v2.9.5
 	github.com/onsi/gomega v1.27.7
-	github.com/stuttgart-things/sthingsBase v0.1.14
-	github.com/stuttgart-things/sthingsCli v0.1.8
+	github.com/stuttgart-things/sthingsBase v0.1.15
+	github.com/stuttgart-things/sthingsCli v0.1.9
 	k8s.io/apimachinery v0.26.0
 	k8s.io/client-go v0.26.0
 	sigs.k8s.io/controller-runtime v0.14.1
