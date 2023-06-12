@@ -206,7 +206,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	webhook := sthingsCli.MsTeamsWebhook{Title: "machine-shop-operator", Text: applyStatus + "\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
 
 	sthingsCli.SendWebhookToTeams(webhook)
-	log.Info("WEBHOOK SENDED TO!", msTeamswebhookUrl)
+	log.Info("WEBHOOK SENDED")
 
 	return ctrl.Result{}, nil
 }
