@@ -1,3 +1,4 @@
+---
 # Source: yacht-tekton-resources/templates/runs.yaml
 apiVersion: tekton.dev/v1
 kind: PipelineRun
