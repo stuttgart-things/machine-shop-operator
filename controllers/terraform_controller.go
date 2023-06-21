@@ -208,7 +208,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	sthingsCli.SendWebhookToTeams(webhook)
 	log.Info("WEBHOOK SENDED")
 
-	fmt.Println("FOO:", os.Getenv("ENABLE_WEBHOOK"))
 	fmt.Println("FOO:", os.Getenv("WEBHOOK_URL"))
 
 	return ctrl.Result{}, nil
