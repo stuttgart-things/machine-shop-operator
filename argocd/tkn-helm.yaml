@@ -2,8 +2,8 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: helm-mso-1-5-0
-  namespace: tkn
+  name: helm-mso0-5-02
+  namespace: tekton-cd
 spec:
   pipelineRef:
     name: package-publish-helmchart
@@ -19,7 +19,7 @@ spec:
         secretName: github-ssh
   params:
     - name: git-repo-url
-      value: "git@github.com:stuttgart-things/stuttgart-things.git"
+      value: "git@github.com:stuttgart-things/machine-shop-operator.git"
     - name: git-revision
       value: "main"
     - name: gitWorkspaceSubdirectory
@@ -31,6 +31,6 @@ spec:
     - name: helm-chart-tag
       value: "v1.4.9"
     - name: registry
-      value: "eu.gcr.io"
+      value: "scr.app.4sthings.tiab.ssc.sva.de"
     - name: working-image
       value: "eu.gcr.io/stuttgart-things/sthings-k8s:1.127.2"

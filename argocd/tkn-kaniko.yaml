@@ -1,9 +1,10 @@
+---
 # Source: yacht-tekton-resources/templates/runs.yaml
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   name: kaniko-mso-1-5-0
-  namespace: tkn
+  namespace: tekton-cd
 spec:
   pipelineRef:
     name: build-kaniko-image
@@ -31,6 +32,6 @@ spec:
     - name: registry
       value: "eu.gcr.io"
     - name: image
-      value: "scr.app.4sthings.tiab.ssc.sva.de/machine-shop/operator"
+      value: "scr.app.4sthings.tiab.ssc.sva.de/machine-shop-operator/mso"
     - name: tag
       value: "v1.4.9"
