@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: eu.gcr.io/stuttgart-things/machine-shop-operator
-  newTag: 23.0621.0906-v0.1.52
+  newTag: 23.0621.0919-v0.1.53
