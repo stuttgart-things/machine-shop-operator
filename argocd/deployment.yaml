@@ -25,7 +25,10 @@ spec:
                 password: <path:apps/data/machine-shop-operator#redisPassword>
             secrets:
               redis:
-                REDIS_PASSWORD: <path:apps/data/machine-shop-operator#redisPassword>
+                name: redis
+                namespace: machine-shop-operator-system
+                secretKVs:
+                  REDIS_PASSWORD: <path:apps/data/machine-shop-operator#redisPassword>
               vault:
                 name: vault
                 namespace: machine-shop-operator-system
