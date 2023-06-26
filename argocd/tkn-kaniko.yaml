@@ -1,37 +1,37 @@
----
-# Source: yacht-tekton-resources/templates/runs.yaml
-apiVersion: tekton.dev/v1
-kind: PipelineRun
-metadata:
-  name: kaniko-mso-1-5-0
-  namespace: tekton-cd
-spec:
-  pipelineRef:
-    name: build-kaniko-image
-  workspaces:
-    - name: dockerconfig
-      secret:
-        secretName: scr-labda-vsphere
-    - name: shared-workspace
-      persistentVolumeClaim:
-        claimName: kaniko-workspace
-    - name: ssh-credentials
-      secret:
-        secretName: github-ssh
-  params:
-    - name: gitRepoUrl
-      value: "git@github.com:stuttgart-things/machine-shop-operator.git"
-    - name: git-revision
-      value: "main"
-    - name: dockerfile
-      value: "Dockerfile"
-    - name: gitWorkspaceSubdirectory
-      value: "/kaniko/mso"
-    - name: context
-      value: "/kaniko/mso/"
-    - name: registry
-      value: "eu.gcr.io"
-    - name: image
-      value: "scr.app.4sthings.tiab.ssc.sva.de/machine-shop-operator/mso"
-    - name: tag
-      value: "v1.4.9"
+# ---
+# # Source: yacht-tekton-resources/templates/runs.yaml
+# apiVersion: tekton.dev/v1
+# kind: PipelineRun
+# metadata:
+#   name: kaniko-mso-1-5-0
+#   namespace: tekton-cd
+# spec:
+#   pipelineRef:
+#     name: build-kaniko-image
+#   workspaces:
+#     - name: dockerconfig
+#       secret:
+#         secretName: scr-labda-vsphere
+#     - name: shared-workspace
+#       persistentVolumeClaim:
+#         claimName: kaniko-workspace
+#     - name: ssh-credentials
+#       secret:
+#         secretName: github-ssh
+#   params:
+#     - name: gitRepoUrl
+#       value: "git@github.com:stuttgart-things/machine-shop-operator.git"
+#     - name: git-revision
+#       value: "main"
+#     - name: dockerfile
+#       value: "Dockerfile"
+#     - name: gitWorkspaceSubdirectory
+#       value: "/kaniko/mso"
+#     - name: context
+#       value: "/kaniko/mso/"
+#     - name: registry
+#       value: "eu.gcr.io"
+#     - name: image
+#       value: "scr.app.4sthings.tiab.ssc.sva.de/machine-shop-operator/mso"
+#     - name: tag
+#       value: "v1.4.9"
