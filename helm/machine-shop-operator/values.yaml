@@ -1,6 +1,4 @@
 namespace: machine-shop-operator-system
-redis:
-  enabled: true
 # secrets:
 #   vault:
 #     name: vault
@@ -14,6 +12,21 @@ redis:
 #       VAULT_TOKEN: <path:apps/data/vault#token>
 #       VAULT_NAMESPACE: <path:apps/data/vault#namespace>
 #       VAULT_ADDR: <path:apps/data/vault#addr>
+redis:
+  enabled: true
+  sentinel:
+    enabled: true
+  master:
+    service:
+      type: ClusterIP
+    persistence:
+      enabled: false
+      medium: ""
+  replica:
+    replicaCount: 1
+    persistence:
+      enabled: false
+      medium: ""
 configmaps:
   environment:
     WEBHOOK_URL: ""
@@ -325,7 +338,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0626.1114-v0.1.54-ANSIBLE-CR'
+      tag: '23.0626.1244-v0.1.55-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
@@ -370,6 +383,7 @@ deployment:
         capabilities:
           drop:
             - ALL
+        runAsUser: 65532
         allowPrivilegeEscalation: false
         privileged: false
         runAsNonRoot: true
