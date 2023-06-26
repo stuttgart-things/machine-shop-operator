@@ -17,6 +17,8 @@ vars:
     sh: git describe --tags --abbrev=0 | cut -d "." -f3 |  cut -d "-" -f1
   VERSION:
     sh: git describe --tags --abbrev=0
+  GIT_COMMIT:
+    sh: git log -n 1 --format=%h
   DATE:
     sh: date +"%y.%m%d.%H%M"
   UPDATED_TAG:
@@ -37,6 +39,24 @@ tasks:
     cmds:
       - cmd: golangci-lint run
         ignore_error: true
+
+  build-informer-container:
+    desc: Run informer container
+    cmds:
+      - '{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-informer:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} --build-arg VERSION={{ .UPDATED_TAG_VERSION }} --build-arg BUILD_DATE={{ .DATE }} --build-arg COMMIT={{ .GIT_COMMIT }} ./informer'
+      - "{{ .CONTAINER_RUNTIME_CMD }} push {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-informer:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"
+
+  run-informer-container:
+    desc: Run informer container
+    deps: [build-informer-container]
+    cmds:
+      - '{{ .CONTAINER_RUNTIME_CMD }} run -v /home/sthings/.kube/dev11:{{ .KUBECONFIG }} -e "KUBECONFIG={{ .KUBECONFIG }}" -e "REDIS_SERVER={{ .REDIS_SERVER }}" -e "REDIS_PORT={{ .REDIS_PORT }}" -e "REDIS_PASSWORD={{ .REDIS_PASSWORD }}" {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-informer:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
+    env:
+      KUBECONFIG: /tmp/kubeconfig
+      REDIS_SERVER: redis-pve.labul.sva.de
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
 
   test:
     desc: Test code

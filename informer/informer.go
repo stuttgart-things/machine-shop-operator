@@ -6,10 +6,13 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"regexp"
-	"strings"
 	"sync"
 	"time"
+
+	sthingsBase "github.com/stuttgart-things/sthingsBase"
+
+	"github.com/fatih/color"
+	goVersion "go.hein.dev/go-version"
 
 	"github.com/redis/go-redis/v9"
 	"k8s.io/client-go/dynamic"
@@ -27,9 +30,33 @@ import (
 
 var (
 	wg sync.WaitGroup
+
+	redisUrl      = os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT")
+	redisPassword = os.Getenv("REDIS_PASSWORD")
+
+	shortened = false
+	version   = "unset"
+	date      = "unknown"
+	commit    = "unknown"
+	output    = "yaml"
 )
 
+const banner = `
+__  __  _____  ____       _____ _   _ ______ ____  _____  __  __ ______ _____
+|  \/  |/ ____|/ __ \     |_   _| \ | |  ____/ __ \|  __ \|  \/  |  ____|  __ \
+| \  / | (___ | |  | |______| | |  \| | |__ | |  | | |__) | \  / | |__  | |__) |
+| |\/| |\___ \| |  | |______| | | . | |  __|| |  | |  _  /| |\/| |  __| |  _  /
+| |  | |____) | |__| |     _| |_| |\  | |   | |__| | | \ \| |  | | |____| | \ \
+|_|  |_|_____/ \____/     |_____|_| \_|_|    \____/|_|  \_|_|  |_|______|_|  \_\
+
+`
+
 func main() {
+
+	// Output banner + version output
+	color.Cyan(banner)
+	resp := goVersion.FuncWithOutput(shortened, version, commit, date, output)
+	color.Magenta(resp + "\n" + "REDIS-URL: " + redisUrl + "\n")
 
 	clusterConfig, _ := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
 	clusterClient, err := dynamic.NewForConfig(clusterConfig)
@@ -80,11 +107,13 @@ func main() {
 
 					ctx := context.TODO()
 
-					rdb := redis.NewClient(&redis.Options{ // no password set
-						DB: 0, // use default DB
+					rdb := redis.NewClient(&redis.Options{
+						Addr:     redisUrl,
+						Password: redisPassword, // no password set
+						DB:       0,             // use default DB
 					})
 
-					rdb.Set(ctx, "language", "Go", 1)
+					rdb.Set(ctx, "language", "Go", 1000000)
 
 					err = rdb.Set(ctx, job.Name, "created", 0).Err()
 					if err != nil {
@@ -125,11 +154,13 @@ func main() {
 					fmt.Println(kind, status["status"])
 
 					rdb := redis.NewClient(&redis.Options{
-						DB: 0, // use default DB
+						Addr:     redisUrl,
+						Password: redisPassword, // no password set
+						DB:       0,             // use default DB
 					})
 
 					ctx := context.TODO()
-					rdb.Set(ctx, "language", "Go", 1)
+					rdb.Set(ctx, "language", "Go", 1000000)
 
 					err = rdb.Set(ctx, job.Name, status["status"], 0).Err()
 					if err != nil {
@@ -178,20 +209,8 @@ func jobComplete(prStatus string) (jobStatusMessage map[string]string) {
 
 	jobStatusMessage = make(map[string]string)
 
-	jobStatusMessage["status"], _ = GetRegexSubMatch(prStatus, `Complete\s(\w+)`)
+	jobStatusMessage["status"], _ = sthingsBase.GetRegexSubMatch(prStatus, `Complete\s(\w+)`)
 
 	return
 
-}
-
-func GetRegexSubMatch(scanText, regexPattern string) (string, bool) {
-
-	rgx := regexp.MustCompile(regexPattern)
-	regexSubMatch := rgx.FindStringSubmatch(scanText)
-
-	if len(regexSubMatch) == 0 {
-		return "", false
-	}
-
-	return strings.Trim(regexSubMatch[1], " "), true
 }

@@ -1,4 +1,6 @@
 namespace: machine-shop-operator-system
+redis:
+  enabled: true
 # secrets:
 #   vault:
 #     name: vault
@@ -323,7 +325,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0621.0919-v0.1.53'
+      tag: '23.0626.1114-v0.1.54-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
@@ -350,6 +352,28 @@ deployment:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 128Mi
+    mso-informer:
+      image: eu.gcr.io/stuttgart-things/mso-informer
+      tag: 23.0626.1055-v0.1.54-ANSIBLE-CR
+      replicaCount: 1
+      imagePullPolicy: Always
+      # secretsEnvFrom:
+      #   - name: redis-connection
+      securityContext:
+        capabilities:
+          drop:
+            - ALL
+        allowPrivilegeEscalation: false
+        privileged: false
+        runAsNonRoot: true
+        readOnlyRootFilesystem: true
       resources:
         requests:
           cpu: 10m
