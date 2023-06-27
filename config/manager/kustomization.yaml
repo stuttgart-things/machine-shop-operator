@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: eu.gcr.io/stuttgart-things/machine-shop-operator
-  newTag: 23.0627.1417-v0.1.64-ANSIBLE-CR
+  newTag: 23.0627.1617-v0.1.66-ANSIBLE-CR
