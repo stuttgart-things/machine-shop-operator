@@ -180,8 +180,7 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 	fmt.Println(renderedJob)
 
 	// CREATE JOB ON CLUSTER
-	// clusterConfig, clusterConnection := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
-	// sthingsK8s.CreateDynamicResourcesFromTemplate(clusterConfig, renderedJob, os.Getenv("INFORMING_NAMESPACE"))
+	// sthingsK8s.CreateDynamicResourcesFromTemplate(ctrl.GetClient(), renderedJob, os.Getenv("INFORMING_NAMESPACE"))
 
 	// CHECK IF KEY EXISTS IN REDIS
 	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
