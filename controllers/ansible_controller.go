@@ -28,7 +28,6 @@ import (
 
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
-	sthingsK8s "github.com/stuttgart-things/sthingsK8s"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -181,8 +180,8 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 	fmt.Println(renderedJob)
 
 	// CREATE JOB ON CLUSTER
-	clusterConfig, clusterConnection := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
-	sthingsK8s.CreateDynamicResourcesFromTemplate(clusterConfig, renderedJob, os.Getenv("INFORMING_NAMESPACE"))
+	// clusterConfig, clusterConnection := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
+	// sthingsK8s.CreateDynamicResourcesFromTemplate(clusterConfig, renderedJob, os.Getenv("INFORMING_NAMESPACE"))
 
 	// CHECK IF KEY EXISTS IN REDIS
 	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
