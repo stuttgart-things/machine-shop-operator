@@ -112,14 +112,16 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 	})
 
 	// check if key exists already in redis
-	fmt.Println("CHECK IF KEY " + name + " EXISTS..")
+	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
 	keyExists, err := rdb.Exists(context.TODO(), name).Result()
 	if err != nil {
 		panic(err)
 	}
 
 	// check for value if key exists in redis
-	if keyExists == 0 {
+	if keyExists == 1 {
+
+		fmt.Println("KEY " + name + " EXISTS..CHECKING FOR IT'S VALUE")
 
 		jobsStatus, err := rdb.Get(context.TODO(), name).Result()
 		if err != nil {
@@ -132,9 +134,9 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 
 		fmt.Println("STATUS", jobsStatus)
 
+	} else {
+		fmt.Println("KEY " + name + " DOES NOT EXIST)")
 	}
-
-	fmt.Println("KEY " + name + " does not exists (already)")
 
 	return
 }
