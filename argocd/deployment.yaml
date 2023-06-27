@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: eu.gcr.io/stuttgart-things
     chart: machine-shop-operator
-    targetRevision: v0.1.62
+    targetRevision: v0.1.63
     plugin:
       name: argocd-vault-plugin-helm
       env:
