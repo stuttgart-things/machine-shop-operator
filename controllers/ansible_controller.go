@@ -78,6 +78,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		playbook string   = ansibleCR.Spec.Playbook
 		vars     []string = ansibleCR.Spec.Vars
 	)
+	fmt.Println("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
+	fmt.Println("REDIS_PASSWORD", os.Getenv("REDIS_PASSWORD"))
 
 	fmt.Println("hosts:", hosts)
 	fmt.Println("playbook:", playbook)
@@ -110,6 +112,7 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 	})
 
 	// check if key exists already in redis
+	fmt.Println("CHECK IF KEY " + name + " EXISTS..")
 	keyExists, err := rdb.Exists(context.TODO(), name).Result()
 	if err != nil {
 		panic(err)
