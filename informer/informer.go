@@ -34,11 +34,11 @@ var (
 	redisUrl      = os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT")
 	redisPassword = os.Getenv("REDIS_PASSWORD")
 
-	shortened = false
-	version   = "unset"
-	date      = "unknown"
-	commit    = "unknown"
-	output    = "yaml"
+	informingNamespace = os.Getenv("INFORMING_NAMESPACE")
+	version            = "unset"
+	date               = "unknown"
+	commit             = "unknown"
+	output             = "yaml"
 )
 
 const banner = `
@@ -55,7 +55,7 @@ func main() {
 
 	// Output banner + version output
 	color.Cyan(banner)
-	resp := goVersion.FuncWithOutput(shortened, version, commit, date, output)
+	resp := goVersion.FuncWithOutput(false, version, commit, date, output)
 	color.Magenta(resp + "\n" + "REDIS-URL: " + redisUrl + "\n")
 
 	clusterConfig, _ := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
@@ -73,7 +73,7 @@ func main() {
 		wg.Add(1)
 
 		kind := kinds[i]
-		namespace := "machine-shop"
+		namespace := informingNamespace
 
 		go func() {
 			defer wg.Done()

@@ -1,0 +1,27 @@
+# permissions for end users to view ansibles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ansible-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: machine-shop-operator
+    app.kubernetes.io/part-of: machine-shop-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: ansible-viewer-role
+rules:
+- apiGroups:
+  - machineshop.sthings.tiab.ssc.sva.de
+  resources:
+  - ansibles
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - machineshop.sthings.tiab.ssc.sva.de
+  resources:
+  - ansibles/status
+  verbs:
+  - get

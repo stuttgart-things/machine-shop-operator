@@ -1,0 +1,59 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: ansibles.machineshop.sthings.tiab.ssc.sva.de
+spec:
+  group: machineshop.sthings.tiab.ssc.sva.de
+  names:
+    kind: Ansible
+    listKind: AnsibleList
+    plural: ansibles
+    singular: ansible
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Ansible is the Schema for the ansibles API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AnsibleSpec defines the desired state of Ansible
+            properties:
+              hosts:
+                description: Foo is an example field of Ansible. Edit ansible_types.go
+                  to remove/update
+                type: string
+              playbook:
+                type: string
+              vars:
+                items:
+                  type: string
+                type: array
+            required:
+            - playbook
+            - vars
+            type: object
+          status:
+            description: AnsibleStatus defines the observed state of Ansible
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
