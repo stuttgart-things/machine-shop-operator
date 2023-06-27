@@ -17,8 +17,10 @@ limitations under the License.
 package controllers
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"os"
 	"time"
 
@@ -34,6 +36,68 @@ import (
 
 	machineshopv1beta1 "github.com/stuttgart-things/machine-shop-operator/api/v1beta1"
 )
+
+type AnsibleJobstruct struct {
+	Name string
+}
+
+const ansibleJobTemplate = `
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Name }}
+  namespace: machine-shop
+  labels:
+    app: machine-shop-operator
+    machine-shop-operator: ansible
+spec:
+  template:
+    metadata:
+      name: 2023-06-27-configure-rke-node-mary
+      labels:
+        app: machine-shop-operator
+        machine-shop-operator: ansible
+    spec:
+      containers:
+        - name: manager
+          image: eu.gcr.io/stuttgart-things/sthings-ansible:8.0.0-4
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: true
+            privileged: true
+            runAsNonRoot: true
+            readOnlyRootFilesystem: false
+            runAsUser: 65532
+          env:
+            - name: ANSIBLE_HOST_KEY_CHECKING
+              value: "False"
+            - name: INV_PATH
+              value: "/tmp/inv"
+            - name: TARGETS
+              value: "mso-vm2.tiab.labda.sva.de"
+          envFrom:
+            - secretRef:
+                name: vault
+          resources:
+            requests:
+              cpu: 10m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          command:
+            - /bin/sh
+            - -ec
+            - touch ${INV_PATH} && ansible-playbook -i $INV_PATH $HOME/ansible/play.yaml -vv -e prepare_env=true -e execute_baseos=true -e target_play=configure-rke-node
+          volumeMounts:
+            - name: ansible
+              mountPath: /home/nonroot/ansible
+      restartPolicy: Never
+      volumes:
+        - name: ansible
+          configMap:
+            name: ansible
+`
 
 // AnsibleReconciler reconciles a Ansible object
 type AnsibleReconciler struct {
@@ -111,14 +175,18 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 		DB:       0,
 	})
 
-	// check if key exists already in redis
+	// TEST RENDER JOB
+	renderedJob := renderAnsibleJob("base-os")
+	fmt.Println(renderedJob)
+
+	// CHECK IF KEY EXISTS IN REDIS
 	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
 	keyExists, err := rdb.Exists(context.TODO(), name).Result()
 	if err != nil {
 		panic(err)
 	}
 
-	// check for value if key exists in redis
+	// CHECK FOR VALUE/STATUS IN REDIS
 	if keyExists == 1 {
 
 		fmt.Println("KEY " + name + " EXISTS..CHECKING FOR IT'S VALUE")
@@ -139,4 +207,26 @@ func checkForAnsibleJob(name string) (jobIsFinished bool) {
 	}
 
 	return
+}
+
+func renderAnsibleJob(name string) string {
+
+	job := AnsibleJobstruct{
+		Name: name,
+	}
+
+	tmpl, err := template.New("pipelinerun").Parse(ansibleJobTemplate)
+	if err != nil {
+		panic(err)
+	}
+
+	var buf bytes.Buffer
+
+	err = tmpl.Execute(&buf, job)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return buf.String()
 }
