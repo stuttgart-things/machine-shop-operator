@@ -1,4 +1,5 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
 - machineshop_v1beta1_terraform.yaml
+- machineshop_v1beta1_ansible.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

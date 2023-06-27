@@ -20,4 +20,13 @@ resources:
   kind: Terraform
   path: github.com/stuttgart-things/machine-shop-operator/api/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: sthings.tiab.ssc.sva.de
+  group: machineshop
+  kind: Ansible
+  path: github.com/stuttgart-things/machine-shop-operator/api/v1beta1
+  version: v1beta1
 version: "3"
