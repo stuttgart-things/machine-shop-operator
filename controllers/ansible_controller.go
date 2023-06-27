@@ -103,25 +103,35 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func checkForAnsibleJob(name string) (jobIsFinished bool) {
 
-	redisUrl := os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT")
-	redisPassword := os.Getenv("REDIS_PASSWORD")
-
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     redisUrl,
-		Password: redisPassword, // no password set
-		DB:       0,             // use default DB
+		Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,
 	})
 
-	val, err := rdb.Get(context.TODO(), name).Result()
+	// check if key exists already in redis
+	keyExists, err := rdb.Exists(context.TODO(), name).Result()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("FOUND", val)
+	// check for value if key exists in redis
+	if keyExists == 0 {
 
-	if val == "finished" {
-		jobIsFinished = true
+		jobsStatus, err := rdb.Get(context.TODO(), name).Result()
+		if err != nil {
+			panic(err)
+		}
+
+		if jobsStatus == "finished" {
+			jobIsFinished = true
+		}
+
+		fmt.Println("STATUS", jobsStatus)
+
 	}
+
+	fmt.Println("KEY " + name + " does not exists (already)")
 
 	return
 }
