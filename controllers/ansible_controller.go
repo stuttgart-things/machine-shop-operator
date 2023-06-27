@@ -19,6 +19,10 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -79,6 +83,14 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	fmt.Println("playbook:", playbook)
 	fmt.Println("vars:", vars)
 
+	for range time.Tick(time.Second * 10) {
+		if checkForAnsibleJob(playbook) {
+			break
+		}
+	}
+
+	fmt.Println("ANSIBLE " + playbook + " PLAYBOOK-FINISHED!")
+
 	return ctrl.Result{}, nil
 }
 
@@ -87,4 +99,29 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&machineshopv1beta1.Ansible{}).
 		Complete(r)
+}
+
+func checkForAnsibleJob(name string) (jobIsFinished bool) {
+
+	redisUrl := os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT")
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     redisUrl,
+		Password: redisPassword, // no password set
+		DB:       0,             // use default DB
+	})
+
+	val, err := rdb.Get(context.TODO(), name).Result()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("FOUND", val)
+
+	if val == "finished" {
+		jobIsFinished = true
+	}
+
+	return
 }

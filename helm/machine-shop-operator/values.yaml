@@ -340,7 +340,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0627.1109-v0.1.58-ANSIBLE-CR'
+      tag: '23.0627.1148-v0.1.59-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
@@ -376,7 +376,7 @@ deployment:
           memory: 128Mi
     mso-informer:
       image: eu.gcr.io/stuttgart-things/mso-informer
-      tag: 23.0626.1055-v0.1.54-ANSIBLE-CR
+      tag: 23.0627.1148-v0.1.59-ANSIBLE-CR
       replicaCount: 1
       imagePullPolicy: Always
       # secretsEnvFrom:
