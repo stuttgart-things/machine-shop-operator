@@ -40,7 +40,7 @@ tasks:
       - cmd: golangci-lint run
         ignore_error: true
 
-  build-informer-container:
+  build-informer-image:
     desc: Run informer container
     cmds:
       - '{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-informer:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} --build-arg VERSION={{ .UPDATED_TAG_VERSION }} --build-arg BUILD_DATE={{ .DATE }} --build-arg COMMIT={{ .GIT_COMMIT }} ./informer'
@@ -130,7 +130,7 @@ tasks:
 
   push:
     desc: Push to registry
-    deps: [build-image, build-informer-container, package]
+    deps: [build-image, package]
     cmds:
       - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
       - yq e -i '.spec.source.targetRevision = "{{ .UPDATED_TAG_VERSION }}"' argocd/deployment.yaml

@@ -28,6 +28,62 @@ redis:
       enabled: false
       medium: ""
 configmaps:
+  resource-templates: |
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: {{ .Name }}
+      namespace: machine-shop
+      labels:
+        app: machine-shop-operator
+        machine-shop-operator: ansible
+    spec:
+      template:
+        metadata:
+          name: 2023-06-27-configure-rke-node-mary
+          labels:
+            app: machine-shop-operator
+            machine-shop-operator: ansible
+        spec:
+          containers:
+            - name: manager
+              image: eu.gcr.io/stuttgart-things/sthings-ansible:8.0.0-4
+              imagePullPolicy: Always
+              securityContext:
+                allowPrivilegeEscalation: true
+                privileged: true
+                runAsNonRoot: true
+                readOnlyRootFilesystem: false
+                runAsUser: 65532
+              env:
+                - name: ANSIBLE_HOST_KEY_CHECKING
+                  value: "False"
+                - name: INV_PATH
+                  value: "/tmp/inv"
+                - name: TARGETS
+                  value: "mso-vm2.tiab.labda.sva.de"
+              envFrom:
+                - secretRef:
+                    name: vault
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 768Mi
+              command:
+                - /bin/sh
+                - -ec
+                - touch ${INV_PATH} && ansible-playbook -i $INV_PATH $HOME/ansible/play.yaml -vv -e prepare_env=true -e execute_baseos=true -e target_play=configure-rke-node
+              volumeMounts:
+                - name: ansible
+                  mountPath: /home/nonroot/ansible
+          restartPolicy: Never
+          volumes:
+            - name: ansible
+              configMap:
+                name: ansible
   informer:
     INFORMING_NAMESPACE: machine-shop
   environment:
@@ -340,7 +396,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0628.1039-v0.1.68-ANSIBLE-CR'
+      tag: '23.0628.1428-v0.1.69-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
@@ -376,7 +432,7 @@ deployment:
           memory: 128Mi
     mso-informer:
       image: eu.gcr.io/stuttgart-things/mso-informer
-      tag: 23.0628.1039-v0.1.68-ANSIBLE-CR
+      tag: 23.0628.1428-v0.1.69-ANSIBLE-CR
       replicaCount: 1
       imagePullPolicy: Always
       # secretsEnvFrom:
