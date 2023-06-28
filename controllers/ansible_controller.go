@@ -26,6 +26,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
+	"github.com/stuttgart-things/redisqueue"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -148,6 +149,30 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	fmt.Println("hosts:", hosts)
 	fmt.Println("playbook:", playbook)
 	fmt.Println("vars:", vars)
+
+	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
+		MaxLen:               10000,
+		ApproximateMaxLength: true,
+		RedisClient: redis.NewClient(&redis.Options{
+			Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+			DB:       0,
+		}),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	redisStreamErr := p.Enqueue(&redisqueue.Message{
+		Stream: "machineshop:operator",
+		Values: map[string]interface{}{
+			"name": "operator",
+		},
+	})
+
+	if redisStreamErr != nil {
+		panic(err)
+	}
 
 	for range time.Tick(time.Second * 10) {
 		if checkForAnsibleJob(playbook) {
