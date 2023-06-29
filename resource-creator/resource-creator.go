@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"os"
 	"time"
 
@@ -46,11 +48,6 @@ func main() {
 	resp := goVersion.FuncWithOutput(false, version, commit, date, output)
 	color.Magenta(resp + "\n")
 
-	clusterConfig, _ := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
-	ns := sthingsK8s.GetK8sNamespaces(clusterConfig)
-
-	fmt.Println("FOUND NAMESAPCES", ns)
-
 	c, err := redisqueue.NewConsumerWithOptions(&redisqueue.ConsumerOptions{
 		VisibilityTimeout: 60 * time.Second,
 		BlockingTimeout:   5 * time.Second,
@@ -68,7 +65,7 @@ func main() {
 		panic(err)
 	}
 
-	c.Register(redisStream, process)
+	c.Register(redisStream, processTasks)
 
 	go func() {
 		for err := range c.Errors {
@@ -84,29 +81,100 @@ func main() {
 	fmt.Println("POLLING FOR REDIS STREAM STOPPED")
 }
 
-func process(msg *redisqueue.Message) error {
-	fmt.Printf("processing message: %v\n", msg.Values["index"])
+func processTasks(msg *redisqueue.Message) error {
+
+	fmt.Println("SCANNING MESSAGE", msg.Values)
 
 	fmt.Printf("name: %v\n", msg.Values["name"])
 
-	// job := AnsibleJobstruct{
-	// 	Name: "hello",
-	// }
+	job := AnsibleJobstruct{
+		Name: msg.Values["name"].(string),
+	}
 
-	// tmpl, err := template.New("pipelinerun").Parse(ansibleJobTemplate)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	renderedTemplate := renderJobTemplate(job)
+	fmt.Println(renderedTemplate)
 
-	// var buf bytes.Buffer
+	clusterConfig, _ := sthingsK8s.GetKubeConfig(os.Getenv("KUBECONFIG"))
+	ns := sthingsK8s.GetK8sNamespaces(clusterConfig)
 
-	// err = tmpl.Execute(&buf, job)
+	fmt.Println("FOUND NAMESAPCES", ns)
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// fmt.Println(buf.String())
+	sthingsK8s.CreateDynamicResourcesFromTemplate(clusterConfig, []byte(renderedTemplate), "default")
 
 	return nil
 }
+
+func renderJobTemplate(job AnsibleJobstruct) string {
+
+	var buf bytes.Buffer
+
+	tmpl, err := template.New("jobTemplate").Parse(ansibleJobTemplate)
+	if err != nil {
+		panic(err)
+	}
+
+	err = tmpl.Execute(&buf, job)
+	if err != nil {
+		panic(err)
+	}
+
+	return buf.String()
+}
+
+const ansibleJobTemplate = `
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Name }}
+  namespace: machine-shop
+  labels:
+    app: machine-shop-operator
+    machine-shop-operator: ansible
+spec:
+  template:
+    metadata:
+      name: 2023-06-27-configure-rke-node-mary
+      labels:
+        app: machine-shop-operator
+        machine-shop-operator: ansible
+    spec:
+      containers:
+        - name: manager
+          image: eu.gcr.io/stuttgart-things/sthings-ansible:8.0.0-4
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: true
+            privileged: true
+            runAsNonRoot: true
+            readOnlyRootFilesystem: false
+            runAsUser: 65532
+          env:
+            - name: ANSIBLE_HOST_KEY_CHECKING
+              value: "False"
+            - name: INV_PATH
+              value: "/tmp/inv"
+            - name: TARGETS
+              value: "mso-vm2.tiab.labda.sva.de"
+          envFrom:
+            - secretRef:
+                name: vault
+          resources:
+            requests:
+              cpu: 10m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          command:
+            - /bin/sh
+            - -ec
+            - touch ${INV_PATH} && ansible-playbook -i $INV_PATH $HOME/ansible/play.yaml -vv -e prepare_env=true -e execute_baseos=true -e target_play=configure-rke-node
+          volumeMounts:
+            - name: ansible
+              mountPath: /home/nonroot/ansible
+      restartPolicy: Never
+      volumes:
+        - name: ansible
+          configMap:
+            name: ansible
+`
