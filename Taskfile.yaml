@@ -40,6 +40,22 @@ tasks:
       - cmd: golangci-lint run
         ignore_error: true
 
+  build-creator-image:
+    desc: Run informer container
+    cmds:
+      - '{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-resource-creator:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} --build-arg VERSION={{ .UPDATED_TAG_VERSION }} --build-arg BUILD_DATE={{ .DATE }} --build-arg COMMIT={{ .GIT_COMMIT }} ./resource-creator'
+      - "{{ .CONTAINER_RUNTIME_CMD }} push {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-resource-creator:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"
+
+  run-creator-container:
+    desc: Run creator container
+    deps: [build-creator-image]
+    cmds:
+      - '{{ .CONTAINER_RUNTIME_CMD }}  run -v /home/sthings/.kube/dev11:/home/nonroot/.kube/config -e "KUBECONFIG=/home/nonroot/.kube/config" -e "REDIS_SERVER={{ .REDIS_SERVER }}" -e "REDIS_PORT={{ .REDIS_PORT }}" -e "REDIS_PASSWORD={{ .REDIS_PASSWORD }}" {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-resource-creator:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
+    env:
+      REDIS_SERVER: redis-pve.labul.sva.de
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
   build-informer-image:
     desc: Run informer container
     cmds:
@@ -48,7 +64,7 @@ tasks:
 
   run-informer-container:
     desc: Run informer container
-    deps: [build-informer-container]
+    deps: [build-informer-image]
     cmds:
       - '{{ .CONTAINER_RUNTIME_CMD }} run -v /home/sthings/.kube/dev11:{{ .KUBECONFIG }} -e "KUBECONFIG={{ .KUBECONFIG }}" -e "REDIS_SERVER={{ .REDIS_SERVER }}" -e "REDIS_PORT={{ .REDIS_PORT }}" -e "REDIS_PASSWORD={{ .REDIS_PASSWORD }}" {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/mso-informer:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
     env:
