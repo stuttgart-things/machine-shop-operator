@@ -27,7 +27,7 @@ spec:
                 name: redis
                 namespace: machine-shop-operator-system
                 secretKVs:
-                  REDIS_PASSWORD: <path:apps/data/machine-shop-operator#redisPassword>
+                  REDIS_PASSWORD: <path:apps/data/sweatshop#redisPassword>
               vault:
                 name: vault
                 namespace: machine-shop-operator-system
@@ -38,7 +38,7 @@ spec:
                   VAULT_NAMESPACE: <path:apps/data/vault#namespace>
             configmaps:
               redis-connection:
-                REDIS_SERVER: "machine-shop-operator-deployment-redis-headless.machine-shop-operator-system.svc.cluster.local"
+                REDIS_SERVER: redis-sweatshop-deployment-headless.sweatshop-redis.svc.cluster.local
                 REDIS_PORT: "6379"
               environment:
                 ENABLE_WEBHOOK: "yes"
