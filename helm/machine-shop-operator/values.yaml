@@ -396,7 +396,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0629.0930-v0.1.71-ANSIBLE-CR'
+      tag: '23.0705.1118-v0.1.72-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
@@ -430,29 +430,29 @@ deployment:
         limits:
           cpu: 500m
           memory: 128Mi
-    mso-informer:
-      image: eu.gcr.io/stuttgart-things/mso-informer
-      tag: 23.0629.0930-v0.1.71-ANSIBLE-CR
-      replicaCount: 1
-      imagePullPolicy: Always
-      # secretsEnvFrom:
-      #   - name: redis-connection
-      securityContext:
-        capabilities:
-          drop:
-            - ALL
-        runAsUser: 65532
-        allowPrivilegeEscalation: false
-        privileged: false
-        runAsNonRoot: true
-        readOnlyRootFilesystem: true
-      resources:
-        requests:
-          cpu: 10m
-          memory: 64Mi
-        limits:
-          cpu: 500m
-          memory: 128Mi
+    # mso-informer:
+    #   image: eu.gcr.io/stuttgart-things/mso-informer
+    #   tag: 23.0629.0930-v0.1.71-ANSIBLE-CR
+    #   replicaCount: 1
+    #   imagePullPolicy: Always
+    #   # secretsEnvFrom:
+    #   #   - name: redis-connection
+    #   securityContext:
+    #     capabilities:
+    #       drop:
+    #         - ALL
+    #     runAsUser: 65532
+    #     allowPrivilegeEscalation: false
+    #     privileged: false
+    #     runAsNonRoot: true
+    #     readOnlyRootFilesystem: true
+    #   resources:
+    #     requests:
+    #       cpu: 10m
+    #       memory: 64Mi
+    #     limits:
+    #       cpu: 500m
+    #       memory: 128Mi
     kube-rbac-proxy:
       image: gcr.io/kubebuilder/kube-rbac-proxy
       tag: v0.13.1
