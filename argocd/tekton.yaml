@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tkn-machine-shop-operator
+  name: tkn-machine-shop-operator-1
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
@@ -36,7 +36,7 @@ spec:
                   image: scr.app.4sthings.tiab.ssc.sva.de/machine-shop-operator/mso
                   tag: 0.8.15
                   registry: eu.gcr.io
-                  dockerfile: images/mso/Dockerfile
+                  dockerfile: Dockerfile
                 workspaces:
                   ssh-credentials:
                     workspaceKind: secret
@@ -47,6 +47,12 @@ spec:
                   dockerconfig:
                     workspaceKind: secret
                     workspaceRef: scr-labda-vsphere
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 
 #             enableRuns: true
 #             runs:
