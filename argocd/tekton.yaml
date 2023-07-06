@@ -22,8 +22,8 @@ spec:
           value: |
             enableRuns: true
             runs:
-              buildKanikoImageGithub:
-                name: build-mso-kaniko-2
+              buildKanikoImage:
+                name: build-mso-kaniko-3
                 addRandomDateToRunName: false
                 namespace: tekton-cd
                 kind: Pipeline
@@ -47,30 +47,30 @@ spec:
                   dockerconfig:
                     workspaceKind: secret
                     workspaceRef: scr-labda-vsphere
-              buildKanikoImageGithub:
-                name: build-mso-kaniko-2
-                addRandomDateToRunName: false
-                namespace: tekton-cd
-                kind: Pipeline
-                ref: package-publish-helmchart
-                params:
-                  git-repo-url: git@github.com:stuttgart-things/machine-shop-operator.git
-                  git-revision: main
-                  gitWorkspaceSubdirectory: /helm/mso
-                  helm-chart-name: machine-shop-operator
-                  helm-chart-tag: 0.8.15
-                  registry: scr.app.4sthings.tiab.ssc.sva.de
-                  working-image: "eu.gcr.io/stuttgart-things/sthings-k8s:1.127.2"
-                workspaces:
-                  ssh-credentials:
-                    workspaceKind: secret
-                    workspaceRef: github-ssh
-                  shared-workspace:
-                    workspaceKind: persistentVolumeClaim
-                    workspaceRef: helm-workspace
-                  dockerconfig:
-                    workspaceKind: secret
-                    workspaceRef: scr-labda-vsphere
+              # buildHelmGithub:
+              #   name: build-mso-helm-3
+              #   addRandomDateToRunName: false
+              #   namespace: tekton-cd
+              #   kind: Pipeline
+              #   ref: package-publish-helmchart
+              #   params:
+              #     git-repo-url: git@github.com:stuttgart-things/machine-shop-operator.git
+              #     git-revision: main
+              #     gitWorkspaceSubdirectory: /helm/mso
+              #     helm-chart-name: machine-shop-operator
+              #     helm-chart-tag: 0.8.15
+              #     registry: scr.app.4sthings.tiab.ssc.sva.de
+              #     working-image: "eu.gcr.io/stuttgart-things/sthings-k8s:1.127.2"
+              #   workspaces:
+              #     ssh-credentials:
+              #       workspaceKind: secret
+              #       workspaceRef: github-ssh
+              #     shared-workspace:
+              #       workspaceKind: persistentVolumeClaim
+              #       workspaceRef: helm-workspace
+              #     dockerconfig:
+              #       workspaceKind: secret
+              #       workspaceRef: scr-labda-vsphere
   syncPolicy:
     automated:
       prune: true
