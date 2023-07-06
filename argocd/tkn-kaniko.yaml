@@ -1,46 +1,46 @@
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: machine-shop-operator-kaniko
-  namespace: argocd
-spec:
-  project: app
-  destination:
-    name: dev11
-    namespace: tekton-cd
-  source:
-    repoURL: eu.gcr.io/stuttgart-things
-    chart: yacht-tekton-resources
-    targetRevision: v0.47.10
-    plugin:
-      name: argocd-vault-plugin-helm
-      env:
-        - name: HELM_VALUES
-          value: |
-            enableRuns: true
-            buildKanikoImageGithub:
-              name: build-mso-manager-kaniko
-              addRandomDateToRunName: false
-              namespace: tekton-cd
-              kind: Pipeline
-              ref: build-kaniko-image
-              params:
-                gitRepoUrl: git@github.com:stuttgart-things/machine-shop-operator.git
-                git-revision: main
-                context: /kaniko/mso-manager
-                gitWorkspaceSubdirectory: /kaniko/mso-manager
-                image: scr.app.4sthings.tiab.ssc.sva.de/machine-shop-operator/mso
-                tag: 0.8.15
-                registry: eu.gcr.io
-                dockerfile: Dockerfile
-              workspaces:
-                ssh-credentials:
-                  workspaceKind: secret
-                  workspaceRef: github-ssh
-                shared-workspace:
-                  workspaceKind: persistentVolumeClaim
-                  workspaceRef: kaniko-workspace
-                dockerconfig:
-                  workspaceKind: secret
-                  workspaceRef: scr-labda-vsphere
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: machine-shop-operator-kaniko
+#   namespace: argocd
+# spec:
+#   project: app
+#   destination:
+#     name: dev11
+#     namespace: tekton-cd
+#   source:
+#     repoURL: eu.gcr.io/stuttgart-things
+#     chart: yacht-tekton-resources
+#     targetRevision: v0.47.10
+#     plugin:
+#       name: argocd-vault-plugin-helm
+#       env:
+#         - name: HELM_VALUES
+#           value: |
+#             enableRuns: true
+#             buildKanikoImageGithub:
+#               name: build-mso-manager-kaniko
+#               addRandomDateToRunName: false
+#               namespace: tekton-cd
+#               kind: Pipeline
+#               ref: build-kaniko-image
+#               params:
+#                 gitRepoUrl: git@github.com:stuttgart-things/machine-shop-operator.git
+#                 git-revision: main
+#                 context: /kaniko/mso-manager
+#                 gitWorkspaceSubdirectory: /kaniko/mso-manager
+#                 image: scr.app.4sthings.tiab.ssc.sva.de/machine-shop-operator/mso
+#                 tag: 0.8.15
+#                 registry: eu.gcr.io
+#                 dockerfile: Dockerfile
+#               workspaces:
+#                 ssh-credentials:
+#                   workspaceKind: secret
+#                   workspaceRef: github-ssh
+#                 shared-workspace:
+#                   workspaceKind: persistentVolumeClaim
+#                   workspaceRef: kaniko-workspace
+#                 dockerconfig:
+#                   workspaceKind: secret
+#                   workspaceRef: scr-labda-vsphere
