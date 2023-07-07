@@ -23,7 +23,7 @@ spec:
             enableRuns: true
             runs:
               buildKanikoImage:
-                name: build-mso-kaniko-4
+                name: build-mso-kaniko-5
                 addRandomDateToRunName: false
                 namespace: tekton-cd
                 kind: Pipeline
@@ -48,7 +48,7 @@ spec:
                     workspaceKind: secret
                     workspaceRef: scr-labda-vsphere
               buildHelmChart:
-                name: build-mso-helm-4
+                name: build-mso-helm-5
                 addRandomDateToRunName: false
                 namespace: tekton-cd
                 kind: Pipeline
@@ -65,7 +65,7 @@ spec:
                   ssh-credentials:
                     workspaceKind: secret
                     workspaceRef: github-ssh
-                  shared-workspace:
+                  source:
                     workspaceKind: persistentVolumeClaim
                     workspaceRef: helm-workspace
                   dockerconfig:
