@@ -23,7 +23,7 @@ spec:
             enableRuns: true
             runs:
               buildKanikoImage:
-                name: build-mso-kaniko-5
+                name: build-mso-kaniko-6
                 addRandomDateToRunName: false
                 namespace: tekton-cd
                 kind: Pipeline
@@ -48,7 +48,7 @@ spec:
                     workspaceKind: secret
                     workspaceRef: scr-labda-vsphere
               buildHelmChart:
-                name: build-mso-helm-5
+                name: build-mso-helm-6
                 addRandomDateToRunName: false
                 namespace: tekton-cd
                 kind: Pipeline
@@ -59,6 +59,7 @@ spec:
                   gitWorkspaceSubdirectory: /helm/mso
                   helm-chart-name: machine-shop-operator
                   helm-chart-tag: 0.8.15
+                  helm-chart-path: helm/machine-shop-operator/
                   registry: scr.app.4sthings.tiab.ssc.sva.de
                   working-image: "eu.gcr.io/stuttgart-things/sthings-k8s:1.127.2"
                 workspaces:
