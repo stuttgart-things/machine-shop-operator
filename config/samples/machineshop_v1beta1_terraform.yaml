@@ -2,7 +2,7 @@
 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
 kind: Terraform
 metadata:
-  name: mso-vm
+  name: mso-vm-153
   namespace: machine-shop-operator-system
   labels:
     app.kubernetes.io/created-by: machine-shop-operator
@@ -13,8 +13,8 @@ spec:
   - access_key=apps/data/artifacts:accessKey
   - secret_key=apps/data/artifacts:secretKey
   module:
-  - moduleName=mso-testvm2
-  - backendKey=mso-testvm2.tfstate
+  - moduleName=mso-vm-153
+  - backendKey=mso-vm-153.tfstate
   - moduleSourceUrl=https://artifacts.tiab.labda.sva.de/modules/vsphere-vm.zip
   - backendEndpoint=https://artifacts.app.4sthings.tiab.ssc.sva.de
   - backendRegion=main
@@ -32,7 +32,7 @@ spec:
   template: vsphere-vm
   terraform-version: 1.5.2
   variables:
-  - vsphere_vm_name="mso-testvm2"
+  - vsphere_vm_name="mso-vm-153"
   - vm_count=1
   - vm_num_cpus=4
   - vm_memory=4096
