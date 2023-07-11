@@ -27,7 +27,7 @@ tekton-resources:
       params:
         git-repo-url: git@github.com:stuttgart-things/machine-shop-operator.git
         git-revision: ANSIBLE-CR
-        gitWorkspaceSubdirectory: /helm/machineshop-operator
+        gitWorkspaceSubdirectory: /helm/machine-shop-operator
         helm-chart-name: machineshop-operator
         helm-chart-tag: 0.8.15
         helm-chart-path: helm
