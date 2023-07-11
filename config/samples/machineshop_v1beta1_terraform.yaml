@@ -2,7 +2,7 @@
 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
 kind: Terraform
 metadata:
-  name: mso-testvm2
+  name: mso-vm
   namespace: machine-shop-operator-system
   labels:
     app.kubernetes.io/created-by: machine-shop-operator
@@ -21,8 +21,8 @@ spec:
   - backendBucket=vsphere-vm
   - tfProviderName=vsphere
   - tfProviderSource=hashicorp/vsphere
-  - tfProviderVersion=2.4.0
-  - tfVersion=1.4.6
+  - tfProviderVersion=2.4.1
+  - tfVersion=1.5.2
   secrets:
   - vsphere_user=cloud/data/vsphere:username
   - vsphere_password=cloud/data/vsphere:password
@@ -30,7 +30,7 @@ spec:
   - vm_ssh_user=cloud/data/vsphere:vm_ssh_user
   - vm_ssh_password=cloud/data/vsphere:vm_ssh_password
   template: vsphere-vm
-  terraform-version: 1.4.6
+  terraform-version: 1.5.2
   variables:
   - vsphere_vm_name="mso-testvm2"
   - vm_count=1
