@@ -1,12 +1,12 @@
-apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
-kind: Ansible
-metadata:
-  labels:
-    app.kubernetes.io/name: ansible
-    app.kubernetes.io/instance: ansible-sample
-    app.kubernetes.io/part-of: machine-shop-operator
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: machine-shop-operator
-  name: ansible-sample
-spec:
-  # TODO(user): Add fields here
+# apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
+# kind: Ansible
+# metadata:
+#   labels:
+#     app.kubernetes.io/name: ansible
+#     app.kubernetes.io/instance: ansible-sample
+#     app.kubernetes.io/part-of: machine-shop-operator
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/created-by: machine-shop-operator
+#   name: ansible-sample
+# spec:
+#   # TODO(user): Add fields here
