@@ -43,7 +43,6 @@ tekton-resources:
         dockerconfig:
           workspaceKind: secret
           workspaceRef: scr-labda-vsphere
-
 redis:
   enabled: false
   sentinel:
@@ -59,7 +58,6 @@ redis:
     persistence:
       enabled: false
       medium: ""
-
 configmaps:
   # resource-templates: |
   #   apiVersion: batch/v1
@@ -429,7 +427,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0705.1224-v0.1.74-ANSIBLE-CR'
+      tag: '23.0711.0848-v0.1.75-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
