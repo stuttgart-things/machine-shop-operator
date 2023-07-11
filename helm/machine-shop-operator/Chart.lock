@@ -5,5 +5,8 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 17.11.6
-digest: sha256:924035b8cb060bc5351623e5a77596f02e28f37ad3aaf572267a72474f5c36e8
-generated: "2023-06-26T10:22:06.822143365Z"
+- name: tekton-resources
+  repository: oci://eu.gcr.io/stuttgart-things
+  version: v0.47.11
+digest: sha256:de336335105633cc4ba705a2f691fb8e25f055899785ed33184b35a60909c9ce
+generated: "2023-07-11T07:51:03.724990705Z"
