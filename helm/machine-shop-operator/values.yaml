@@ -13,7 +13,7 @@ namespace: machine-shop-operator-system
 #       VAULT_NAMESPACE: <path:apps/data/vault#namespace>
 #       VAULT_ADDR: <path:apps/data/vault#addr>
 redis:
-  enabled: true
+  enabled: false
   sentinel:
     enabled: true
   master:
@@ -27,6 +27,7 @@ redis:
     persistence:
       enabled: false
       medium: ""
+
 configmaps:
   # resource-templates: |
   #   apiVersion: batch/v1
