@@ -1,4 +1,6 @@
+{{ if not .Values.tektonResources.enabled }}
 {{- $envVar := . -}}
 {{- range $configmapName, $configmapTpl := .Values.configmaps -}}
 {{ include "sthings-helm-toolkit.configmap" (list $envVar $configmapName $configmapTpl) }}
+{{ end -}}
 {{ end -}}

@@ -1,4 +1,6 @@
+{{ if not .Values.tektonResources.enabled }}
 {{- $envVar := . -}}
 {{- range $service, $serviceDefinition := .Values.services -}}
 {{ include "sthings-helm-toolkit.service" (list $envVar $service $serviceDefinition) }}
+{{ end -}}
 {{ end -}}

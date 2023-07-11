@@ -1,2 +1,4 @@
+{{ if not .Values.tektonResources.enabled }}
 {{- $envVar := . -}}
 {{ include "sthings-helm-toolkit.deployment" (list $envVar) }}
+{{ end -}}
