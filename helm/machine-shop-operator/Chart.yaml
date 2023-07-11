@@ -2,8 +2,8 @@ apiVersion: v2
 name: machine-shop-operator
 description: A Helm chart for Kubernetes
 type: application
-version: 'v0.1.77'
-appVersion: v0.1.77 
+version: 'v0.1.78'
+appVersion: v0.1.78 
 dependencies:
   - name: sthings-helm-toolkit
     version: 2.4.42
