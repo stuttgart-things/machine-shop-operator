@@ -153,7 +153,8 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	err = tf.Init(context.Background(), tfInitOptions...)
 
 	if err != nil {
-		fmt.Println("ERROR RUNNING INIT: %s", err)
+		log.Info("ERROR RUNNING INIT")
+		fmt.Print(err)
 	}
 
 	log.Info("⚡️ INITALIZING OF TERRAFORM DONE ⚡️")
@@ -229,12 +230,14 @@ func initalizeTerraform(terraformDir, terraformVersion string) (tf *tfexec.Terra
 
 	execPath, err := installer.Install(context.Background())
 	if err != nil {
-		fmt.Println("Error installing Terraform: %s", err)
+		fmt.Println("Error installing Terraform")
+		fmt.Print(err)
 	}
 
 	tf, err = tfexec.NewTerraform(terraformDir, execPath)
 	if err != nil {
-		fmt.Println("Error running Terraform: %s", err)
+		fmt.Println("Error running Terraform")
+		fmt.Print(err)
 	}
 
 	return

@@ -17,12 +17,9 @@ limitations under the License.
 package controllers
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"html/template"
 	"os"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 
@@ -37,68 +34,6 @@ import (
 
 	machineshopv1beta1 "github.com/stuttgart-things/machine-shop-operator/api/v1beta1"
 )
-
-type AnsibleJobstruct struct {
-	Name string
-}
-
-const ansibleJobTemplate = `
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ .Name }}
-  namespace: machine-shop
-  labels:
-    app: machine-shop-operator
-    machine-shop-operator: ansible
-spec:
-  template:
-    metadata:
-      name: 2023-06-27-configure-rke-node-mary
-      labels:
-        app: machine-shop-operator
-        machine-shop-operator: ansible
-    spec:
-      containers:
-        - name: manager
-          image: eu.gcr.io/stuttgart-things/sthings-ansible:8.0.0-4
-          imagePullPolicy: Always
-          securityContext:
-            allowPrivilegeEscalation: true
-            privileged: true
-            runAsNonRoot: true
-            readOnlyRootFilesystem: false
-            runAsUser: 65532
-          env:
-            - name: ANSIBLE_HOST_KEY_CHECKING
-              value: "False"
-            - name: INV_PATH
-              value: "/tmp/inv"
-            - name: TARGETS
-              value: "mso-vm2.tiab.labda.sva.de"
-          envFrom:
-            - secretRef:
-                name: vault
-          resources:
-            requests:
-              cpu: 10m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 768Mi
-          command:
-            - /bin/sh
-            - -ec
-            - touch ${INV_PATH} && ansible-playbook -i $INV_PATH $HOME/ansible/play.yaml -vv -e prepare_env=true -e execute_baseos=true -e target_play=configure-rke-node
-          volumeMounts:
-            - name: ansible
-              mountPath: /home/nonroot/ansible
-      restartPolicy: Never
-      volumes:
-        - name: ansible
-          configMap:
-            name: ansible
-`
 
 // AnsibleReconciler reconciles a Ansible object
 type AnsibleReconciler struct {
@@ -143,12 +78,11 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		playbook string   = ansibleCR.Spec.Playbook
 		vars     []string = ansibleCR.Spec.Vars
 	)
-	fmt.Println("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
-	fmt.Println("REDIS_PASSWORD", os.Getenv("REDIS_PASSWORD"))
 
-	fmt.Println("hosts:", hosts)
-	fmt.Println("playbook:", playbook)
-	fmt.Println("vars:", vars)
+	log.Info("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
+	log.Info("hosts", hosts)
+	log.Info("playbook", playbook)
+	log.Info("vars", vars)
 
 	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
 		MaxLen:               10000,
@@ -174,11 +108,11 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		panic(err)
 	}
 
-	for range time.Tick(time.Second * 10) {
-		if checkForAnsibleJob(playbook) {
-			break
-		}
-	}
+	// for range time.Tick(time.Second * 10) {
+	// 	if checkForAnsibleJob(playbook) {
+	// 		break
+	// 	}
+	// }
 
 	fmt.Println("ANSIBLE " + playbook + " PLAYBOOK-FINISHED!")
 
@@ -192,69 +126,47 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func checkForAnsibleJob(name string) (jobIsFinished bool) {
+// func checkForAnsibleJob(name string) (jobIsFinished bool) {
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       0,
-	})
+// 	rdb := redis.NewClient(&redis.Options{
+// 		Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
+// 		Password: os.Getenv("REDIS_PASSWORD"),
+// 		DB:       0,
+// 	})
 
-	// TEST RENDER JOB
-	renderedJob := renderAnsibleJob("base-os")
-	fmt.Println(renderedJob)
+// 	// TEST RENDER JOB
+// 	renderedJob := renderAnsibleJob("base-os")
+// 	fmt.Println(renderedJob)
 
-	// CREATE JOB ON CLUSTER
-	// sthingsK8s.CreateDynamicResourcesFromTemplate(ctrl.GetClient(), renderedJob, os.Getenv("INFORMING_NAMESPACE"))
+// 	// CREATE JOB ON CLUSTER
+// 	// sthingsK8s.CreateDynamicResourcesFromTemplate(ctrl.GetClient(), renderedJob, os.Getenv("INFORMING_NAMESPACE"))
 
-	// CHECK IF KEY EXISTS IN REDIS
-	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
-	keyExists, err := rdb.Exists(context.TODO(), name).Result()
-	if err != nil {
-		panic(err)
-	}
+// 	// CHECK IF KEY EXISTS IN REDIS
+// 	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
+// 	keyExists, err := rdb.Exists(context.TODO(), name).Result()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	// CHECK FOR VALUE/STATUS IN REDIS
-	if keyExists == 1 {
+// 	// CHECK FOR VALUE/STATUS IN REDIS
+// 	if keyExists == 1 {
 
-		fmt.Println("KEY " + name + " EXISTS..CHECKING FOR IT'S VALUE")
+// 		fmt.Println("KEY " + name + " EXISTS..CHECKING FOR IT'S VALUE")
 
-		jobsStatus, err := rdb.Get(context.TODO(), name).Result()
-		if err != nil {
-			panic(err)
-		}
+// 		jobsStatus, err := rdb.Get(context.TODO(), name).Result()
+// 		if err != nil {
+// 			panic(err)
+// 		}
 
-		if jobsStatus == "finished" {
-			jobIsFinished = true
-		}
+// 		if jobsStatus == "finished" {
+// 			jobIsFinished = true
+// 		}
 
-		fmt.Println("STATUS", jobsStatus)
+// 		fmt.Println("STATUS", jobsStatus)
 
-	} else {
-		fmt.Println("KEY " + name + " DOES NOT EXIST)")
-	}
+// 	} else {
+// 		fmt.Println("KEY " + name + " DOES NOT EXIST)")
+// 	}
 
-	return
-}
-
-func renderAnsibleJob(name string) string {
-
-	job := AnsibleJobstruct{
-		Name: name,
-	}
-
-	tmpl, err := template.New("pipelinerun").Parse(ansibleJobTemplate)
-	if err != nil {
-		panic(err)
-	}
-
-	var buf bytes.Buffer
-
-	err = tmpl.Execute(&buf, job)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return buf.String()
-}
+// 	return
+// }
