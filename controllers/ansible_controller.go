@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 
@@ -61,6 +62,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	log.Info("⚡️ Event received! ⚡️")
 	log.Info("Request: ", "req", req)
 
+	// VERIFY CR
 	ansibleCR := &machineshopv1beta1.Ansible{}
 	err := r.Get(ctx, req.NamespacedName, ansibleCR)
 
@@ -74,7 +76,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// GET VARIABLES FROM CR
 	var (
-		hosts    string   = ansibleCR.Spec.Hosts
+		hosts    []string = ansibleCR.Spec.Hosts
 		playbook string   = ansibleCR.Spec.Playbook
 		vars     []string = ansibleCR.Spec.Vars
 	)
@@ -83,6 +85,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	log.Info("hosts", hosts)
 	log.Info("playbook", playbook)
 	log.Info("vars", vars)
+
+	// CREATE VALUES FOR INVENTORY
+	inventory := createInventoryValues(hosts)
+	fmt.Println(inventory)
 
 	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
 		MaxLen:               10000,
@@ -124,6 +130,22 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&machineshopv1beta1.Ansible{}).
 		Complete(r)
+}
+
+func createInventoryValues(hostsGroups []string) (inventory map[string][]string) {
+
+	inventory = make(map[string][]string)
+
+	for _, groups := range hostsGroups {
+		groups := strings.Split(groups, ":")
+		hosts := strings.Split(strings.TrimSpace(groups[1]), ";")
+		inventory[strings.TrimSpace(groups[0])] = strings.Split(strings.TrimSpace(groups[1]), ";")
+
+		fmt.Println("GROUP:", strings.TrimSpace(groups[0]))
+		fmt.Println("HOSTS:", hosts)
+	}
+
+	return
 }
 
 // func checkForAnsibleJob(name string) (jobIsFinished bool) {

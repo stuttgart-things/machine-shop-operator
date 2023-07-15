@@ -29,7 +29,7 @@ type AnsibleSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Ansible. Edit ansible_types.go to remove/update
-	Hosts    string   `json:"hosts,omitempty"`
+	Hosts    []string `json:"hosts,omitempty"`
 	Playbook string   `json:"playbook"`
 	Vars     []string `json:"vars"`
 }

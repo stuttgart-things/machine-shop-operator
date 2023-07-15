@@ -38,7 +38,9 @@ spec:
               hosts:
                 description: Foo is an example field of Ansible. Edit ansible_types.go
                   to remove/update
-                type: string
+                items:
+                  type: string
+                type: array
               playbook:
                 type: string
               vars:
