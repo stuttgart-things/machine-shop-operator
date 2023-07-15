@@ -18,9 +18,7 @@ package controllers
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
-	"strings"
 	"testing"
 )
 
@@ -63,21 +61,21 @@ rt-5.rancher.com
 // 	"worker": {"rt-4.rancher.com", "rt-5.rancher.com"},
 // }
 
-func createInventoryValues(inventoryString []string) (inventory map[string][]string) {
+// func createInventoryValues(inventoryString []string) (inventory map[string][]string) {
 
-	inventory = make(map[string][]string)
+// 	inventory = make(map[string][]string)
 
-	for _, groups := range inventoryString {
-		groups := strings.Split(groups, ":")
-		hosts := strings.Split(strings.TrimSpace(groups[1]), ";")
-		inventory[strings.TrimSpace(groups[0])] = strings.Split(strings.TrimSpace(groups[1]), ";")
+// 	for _, groups := range inventoryString {
+// 		groups := strings.Split(groups, ":")
+// 		hosts := strings.Split(strings.TrimSpace(groups[1]), ";")
+// 		inventory[strings.TrimSpace(groups[0])] = strings.Split(strings.TrimSpace(groups[1]), ";")
 
-		fmt.Println("GROUP:", strings.TrimSpace(groups[0]))
-		fmt.Println("HOSTS:", hosts)
-	}
+// 		fmt.Println("GROUP:", strings.TrimSpace(groups[0]))
+// 		fmt.Println("HOSTS:", hosts)
+// 	}
 
-	return
-}
+// 	return
+// }
 
 func renderTemplate(groupHosts map[string][]string) string {
 
