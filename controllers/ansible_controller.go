@@ -82,9 +82,12 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	)
 
 	log.Info("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
-	log.Info("hosts", hosts)
+	// log.Info("hosts", hosts)
+	fmt.Println(hosts)
+
 	log.Info("playbook", playbook)
-	log.Info("vars", vars)
+	fmt.Println(vars)
+	// log.Info("vars", vars)
 
 	// CREATE VALUES FOR INVENTORY
 	inventory := createInventoryValues(hosts)
