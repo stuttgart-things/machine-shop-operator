@@ -1,12 +1,19 @@
-# apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
-# kind: Ansible
-# metadata:
-#   labels:
-#     app.kubernetes.io/name: ansible
-#     app.kubernetes.io/instance: ansible-sample
-#     app.kubernetes.io/part-of: machine-shop-operator
-#     app.kubernetes.io/managed-by: kustomize
-#     app.kubernetes.io/created-by: machine-shop-operator
-#   name: ansible-sample
-# spec:
-#   # TODO(user): Add fields here
+---
+apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
+kind: Ansible
+metadata:
+  labels:
+    app.kubernetes.io/name: ansible
+    app.kubernetes.io/instance: ansible-sample
+    app.kubernetes.io/part-of: machine-shop-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: machine-shop-operator
+  name: ansible-sample
+spec:
+  hosts:
+  - 'all: localhost'
+  - 'master: rt.rancher.com; rt-2.rancher.com; rt-3.rancher.com'
+  playbook: 2023-07-05-rocky9-baseos-setup-zo3p
+  vars:
+  - hello
+  - whatever
