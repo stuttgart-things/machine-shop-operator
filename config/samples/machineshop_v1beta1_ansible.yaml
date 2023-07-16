@@ -12,7 +12,8 @@ metadata:
 spec:
   hosts:
   - 'all: localhost'
-  - 'master: rt.rancher.com; rt-2.rancher.com; rt-3.rancher.com'
+  - 'master: rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com'
+  - 'worker: rt-4.rancher.com;rt-5.rancher.com'
   playbook: 2023-07-05-rocky9-baseos-setup-zo3p
   vars:
   - hello
