@@ -86,7 +86,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// log.Info("hosts", hosts)
 	fmt.Println(hosts)
 
-	log.Info("playbook", playbook)
+	fmt.Println("playbook", playbook)
 	fmt.Println(vars)
 	// log.Info("vars", vars)
 
