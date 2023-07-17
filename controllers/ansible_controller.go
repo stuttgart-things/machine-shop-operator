@@ -92,18 +92,17 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	fmt.Println(inventory)
 
 	redisValues := map[string]interface{}{
-		"name":                          "inventory",
-		"namespace":                     "default",
 		"template":                      "inventory.gotmpl",
+		"name":                          "ansible-inventory",
+		"namespace":                     "machine-shop",
 		"all":                           "localhost",
 		"loop-master":                   "rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com",
 		"loop-worker":                   "rt-4.rancher.com;rt-5.rancher.com",
 		"merge-inventory;master;worker": "",
-		// "data": inventory,
 	}
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
-	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS")
+	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS: ", os.Getenv("REDIS_STREAM"))
 
 	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
 		MaxLen:               10000,
