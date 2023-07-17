@@ -94,6 +94,12 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	inventory := createInventoryValues(hosts)
 	fmt.Println(inventory)
 
+	redisValues := map[string]interface{}{
+		"name":      "inventory",
+		"namespace": "default",
+		"data":      inventory,
+	}
+
 	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
 		MaxLen:               10000,
 		ApproximateMaxLength: true,
@@ -108,10 +114,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	redisStreamErr := p.Enqueue(&redisqueue.Message{
-		Stream: "machineshop:operator",
-		Values: map[string]interface{}{
-			"name": "operator",
-		},
+		Stream: os.Getenv("REDIS_STREAM"),
+		Values: redisValues,
 	})
 
 	if redisStreamErr != nil {

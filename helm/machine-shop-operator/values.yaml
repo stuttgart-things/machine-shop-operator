@@ -45,19 +45,19 @@ tekton-resources:
           workspaceRef: scr-labda-vsphere
 redis:
   enabled: false
-  sentinel:
-    enabled: true
-  master:
-    service:
-      type: ClusterIP
-    persistence:
-      enabled: false
-      medium: ""
-  replica:
-    replicaCount: 1
-    persistence:
-      enabled: false
-      medium: ""
+  # sentinel:
+  #   enabled: true
+  # master:
+  #   service:
+  #     type: ClusterIP
+  #   persistence:
+  #     enabled: false
+  #     medium: ""
+  # replica:
+  #   replicaCount: 1
+  #   persistence:
+  #     enabled: false
+  #     medium: ""
 configmaps:
   # resource-templates: |
   #   apiVersion: batch/v1
@@ -427,7 +427,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0716.0326-v0.1.83-ANSIBLE-CR'
+      tag: '23.0717.0634-v0.1.84-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
