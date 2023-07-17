@@ -81,24 +81,29 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		vars     []string = ansibleCR.Spec.Vars
 	)
 
-	//log.Info("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
 	fmt.Println("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
-	// log.Info("hosts", hosts)
 	fmt.Println(hosts)
 
 	fmt.Println("playbook", playbook)
 	fmt.Println(vars)
-	// log.Info("vars", vars)
 
 	// CREATE VALUES FOR INVENTORY
 	inventory := createInventoryValues(hosts)
 	fmt.Println(inventory)
 
 	redisValues := map[string]interface{}{
-		"name":      "inventory",
-		"namespace": "default",
-		"data":      inventory,
+		"name":                          "inventory",
+		"namespace":                     "default",
+		"template":                      "inventory.gotmpl",
+		"all":                           "localhost",
+		"loop-master":                   "rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com",
+		"loop-worker":                   "rt-4.rancher.com;rt-5.rancher.com",
+		"merge-inventory;master;worker": "",
+		// "data": inventory,
 	}
+
+	// ENQUEUE INVENTORY IN REDIS STREAMS
+	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS")
 
 	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
 		MaxLen:               10000,
@@ -155,48 +160,3 @@ func createInventoryValues(hostsGroups []string) (inventory map[string][]string)
 
 	return
 }
-
-// func checkForAnsibleJob(name string) (jobIsFinished bool) {
-
-// 	rdb := redis.NewClient(&redis.Options{
-// 		Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
-// 		Password: os.Getenv("REDIS_PASSWORD"),
-// 		DB:       0,
-// 	})
-
-// 	// TEST RENDER JOB
-// 	renderedJob := renderAnsibleJob("base-os")
-// 	fmt.Println(renderedJob)
-
-// 	// CREATE JOB ON CLUSTER
-// 	// sthingsK8s.CreateDynamicResourcesFromTemplate(ctrl.GetClient(), renderedJob, os.Getenv("INFORMING_NAMESPACE"))
-
-// 	// CHECK IF KEY EXISTS IN REDIS
-// 	fmt.Println("CHECKING IF KEY " + name + " EXISTS..")
-// 	keyExists, err := rdb.Exists(context.TODO(), name).Result()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	// CHECK FOR VALUE/STATUS IN REDIS
-// 	if keyExists == 1 {
-
-// 		fmt.Println("KEY " + name + " EXISTS..CHECKING FOR IT'S VALUE")
-
-// 		jobsStatus, err := rdb.Get(context.TODO(), name).Result()
-// 		if err != nil {
-// 			panic(err)
-// 		}
-
-// 		if jobsStatus == "finished" {
-// 			jobIsFinished = true
-// 		}
-
-// 		fmt.Println("STATUS", jobsStatus)
-
-// 	} else {
-// 		fmt.Println("KEY " + name + " DOES NOT EXIST)")
-// 	}
-
-// 	return
-// }
