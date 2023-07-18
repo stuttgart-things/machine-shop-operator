@@ -24,9 +24,13 @@ import (
 
 func TestCreateInventory(t *testing.T) {
 
+	inventory := make(map[string][]string)
 	inventoryString := []string{"all: localhost2", "master: rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com", "worker: rt-4.rancher.com;rt-5.rancher.com"}
 
-	inventory := createInventoryValues(inventoryString)
+	for _, groups := range inventoryString {
+		groupName, hosts := createInventoryValues(groups)
+		inventory[groupName] = hosts
+	}
 
 	rendered := renderTemplate(inventory)
 

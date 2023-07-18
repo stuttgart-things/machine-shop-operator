@@ -87,19 +87,27 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	fmt.Println("playbook", playbook)
 	fmt.Println(vars)
 
-	// CREATE VALUES FOR INVENTORY
-	inventory := createInventoryValues(hosts)
-	fmt.Println(inventory)
+	redisValues := make(map[string]interface{})
 
-	redisValues := map[string]interface{}{
-		"template":                      "inventory.gotmpl",
-		"name":                          "ansible-inventory",
-		"namespace":                     "machine-shop",
-		"all":                           "localhost",
-		"loop-master":                   "rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com",
-		"loop-worker":                   "rt-4.rancher.com;rt-5.rancher.com",
-		"merge-inventory;master;worker": "",
+	redisValues["template"] = "inventory.gotmpl"
+	redisValues["name"] = "ansible-inventory"
+	redisValues["namespace"] = "machine-shop"
+
+	// CREATE VALUES FOR INVENTORY
+	for _, groups := range hosts {
+		groupName, hosts := createInventoryValues(groups)
+		redisValues[groupName] = hosts
 	}
+
+	// redisValues := map[string]interface{}{
+	// 	"template":                      "inventory.gotmpl",
+	// 	"name":                          "ansible-inventory",
+	// 	"namespace":                     "machine-shop",
+	// 	"all":                           "localhost",
+	// 	"loop-master":                   "rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com",
+	// 	"loop-worker":                   "rt-4.rancher.com;rt-5.rancher.com",
+	// 	"merge-inventory;master;worker": "",
+	// }
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS: ", os.Getenv("REDIS_STREAM"))
@@ -144,18 +152,11 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func createInventoryValues(hostsGroups []string) (inventory map[string][]string) {
+func createInventoryValues(groups string) (groupName string, hosts []string) {
 
-	inventory = make(map[string][]string)
-
-	for _, groups := range hostsGroups {
-		groups := strings.Split(groups, ":")
-		hosts := strings.Split(strings.TrimSpace(groups[1]), ";")
-		inventory[strings.TrimSpace(groups[0])] = strings.Split(strings.TrimSpace(groups[1]), ";")
-
-		fmt.Println("GROUP:", strings.TrimSpace(groups[0]))
-		fmt.Println("HOSTS:", hosts)
-	}
+	group := strings.Split(groups, ":")
+	groupName = strings.TrimSpace(group[0])
+	hosts = strings.Split(strings.TrimSpace(group[1]), ";")
 
 	return
 }
