@@ -111,29 +111,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS: ", os.Getenv("REDIS_STREAM"))
-
-	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
-		MaxLen:               10000,
-		ApproximateMaxLength: true,
-		RedisClient: redis.NewClient(&redis.Options{
-			Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
-			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       0,
-		}),
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	redisStreamErr := p.Enqueue(&redisqueue.Message{
-		Stream: os.Getenv("REDIS_STREAM"),
-		Values: redisValues,
-	})
-
-	if redisStreamErr != nil {
-		panic(err)
-	}
-
+	enqueued := enqueueDataInRedisStreams(redisValues)
+	fmt.Println(enqueued)
 	// for range time.Tick(time.Second * 10) {
 	// 	if checkForAnsibleJob(playbook) {
 	// 		break
@@ -157,6 +136,35 @@ func createInventoryValues(groups string) (groupName string, hosts []string) {
 	group := strings.Split(groups, ":")
 	groupName = strings.TrimSpace(group[0])
 	hosts = strings.Split(strings.TrimSpace(group[1]), ";")
+
+	return
+}
+
+func enqueueDataInRedisStreams(redisValues map[string]interface{}) (enqueue bool) {
+
+	p, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
+		MaxLen:               10000,
+		ApproximateMaxLength: true,
+		RedisClient: redis.NewClient(&redis.Options{
+			Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+			DB:       0,
+		}),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	redisStreamErr := p.Enqueue(&redisqueue.Message{
+		Stream: os.Getenv("REDIS_STREAM"),
+		Values: redisValues,
+	})
+
+	if redisStreamErr != nil {
+		panic(err)
+	} else {
+		enqueue = true
+	}
 
 	return
 }
