@@ -13,7 +13,7 @@ spec:
   hosts:
   - 'loop-all: localhost'
   - 'loop-master: rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com'
-  - 'loop-worker: rt-4.rancher.com;rt-5.rancher.com'
+  - 'loop-worker: rt-4.rancher.com;rt-5.rancher.com;rt-7.rancher.com'
   - 'merge-inventory;master;worker:'
   playbook: 2023-07-05-rocky9-baseos-setup-zo3p
   vars:
