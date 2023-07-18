@@ -104,7 +104,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	if enqueueDataInRedisStreams(inventoryStreamValues) {
-		log.Info("⚡️ VALUES ENQUEUE IN REDIS STREAM ⚡️", redisStream)
+		fmt.Println("⚡️ VALUES ENQUEUE IN REDIS STREAM ⚡️ " + redisStream)
 	}
 
 	// for range time.Tick(time.Second * 10) {
