@@ -99,20 +99,6 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		redisValues[groupName] = hosts
 	}
 
-	producer, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
-		MaxLen:               10000,
-		ApproximateMaxLength: true,
-		RedisClient: redis.NewClient(&redis.Options{
-			Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
-			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       0,
-		}),
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
 	// redisValues := map[string]interface{}{
 	// 	"template":                      "inventory.gotmpl",
 	// 	"name":                          "ansible-inventory",
@@ -128,7 +114,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	fmt.Println("REDIS-VALUES:", redisValues)
 
-	enqueued := enqueueDataInRedisStreams(redisValues, producer)
+	enqueued := enqueueDataInRedisStreams(redisValues)
 	fmt.Println("enqueued status:", enqueued)
 	// for range time.Tick(time.Second * 10) {
 	// 	if checkForAnsibleJob(playbook) {
@@ -148,16 +134,30 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func createInventoryValues(groups string) (groupName string, hosts []string) {
+func createInventoryValues(groups string) (groupName string, hosts string) {
 
 	group := strings.Split(groups, ":")
 	groupName = strings.TrimSpace(group[0])
-	hosts = strings.Split(strings.TrimSpace(group[1]), ";")
+	hosts = group[1]
 
 	return
 }
 
-func enqueueDataInRedisStreams(redisValues map[string]interface{}, producer *redisqueue.Producer) (enqueue bool) {
+func enqueueDataInRedisStreams(redisValues map[string]interface{}) (enqueue bool) {
+
+	producer, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
+		MaxLen:               10000,
+		ApproximateMaxLength: true,
+		RedisClient: redis.NewClient(&redis.Options{
+			Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+			DB:       0,
+		}),
+	})
+
+	if err != nil {
+		panic(err)
+	}
 
 	redisStreamErr := producer.Enqueue(&redisqueue.Message{
 		Stream: os.Getenv("REDIS_STREAM"),
