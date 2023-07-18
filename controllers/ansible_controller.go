@@ -87,35 +87,25 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	fmt.Println("playbook", playbook)
 	fmt.Println(vars)
 
-	redisValues := make(map[string]interface{})
+	// GET VARIABLES FROM CR
 
-	redisValues["template"] = "inventory.gotmpl"
-	redisValues["name"] = "ansible-inventory"
-	redisValues["namespace"] = "machine-shop"
+	// INVENTORY VALUES
+	inventoryStreamValues := make(map[string]interface{})
+	inventoryStreamValues["template"] = "inventory.gotmpl"
+	inventoryStreamValues["name"] = req.Name
+	inventoryStreamValues["namespace"] = "machine-shop"
 
 	// CREATE VALUES FOR INVENTORY
 	for _, groups := range hosts {
 		groupName, hosts := createInventoryValues(groups)
-		redisValues[groupName] = hosts
+		inventoryStreamValues[groupName] = hosts
 	}
 
-	// redisValues := map[string]interface{}{
-	// 	"template":                      "inventory.gotmpl",
-	// 	"name":                          "ansible-inventory",
-	// 	"namespace":                     "machine-shop",
-	// 	"all":                           "localhost",
-	// 	"loop-master":                   "rt.rancher.com;rt-2.rancher.com;rt-3.rancher.com",
-	// 	"loop-worker":                   "rt-4.rancher.com;rt-5.rancher.com",
-	// 	"merge-inventory;master;worker": "",
-	// }
-
 	// ENQUEUE INVENTORY IN REDIS STREAMS
-	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS: ", os.Getenv("REDIS_STREAM"))
+	if enqueueDataInRedisStreams(inventoryStreamValues) {
+		log.Info("VALUES ENQUEUE IN REDIS STREAM ", os.Getenv("REDIS_STREAM"))
+	}
 
-	fmt.Println("REDIS-VALUES:", redisValues)
-
-	enqueued := enqueueDataInRedisStreams(redisValues)
-	fmt.Println("enqueued status:", enqueued)
 	// for range time.Tick(time.Second * 10) {
 	// 	if checkForAnsibleJob(playbook) {
 	// 		break
