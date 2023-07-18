@@ -111,8 +111,11 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	fmt.Println("ENQUEUE INVENTORY IN REDIS STREAMS: ", os.Getenv("REDIS_STREAM"))
+
+	fmt.Println("REDIS-VALUES:", redisValues)
+
 	enqueued := enqueueDataInRedisStreams(redisValues)
-	fmt.Println(enqueued)
+	fmt.Println("enqueued status:", enqueued)
 	// for range time.Tick(time.Second * 10) {
 	// 	if checkForAnsibleJob(playbook) {
 	// 		break
