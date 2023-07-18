@@ -74,11 +74,12 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}
 
-	// GET VARIABLES FROM CR
+	// GET VARIABLES FROM CR + ENV
 	var (
-		hosts    []string = ansibleCR.Spec.Hosts
-		playbook string   = ansibleCR.Spec.Playbook
-		vars     []string = ansibleCR.Spec.Vars
+		hosts       []string = ansibleCR.Spec.Hosts
+		playbook    string   = ansibleCR.Spec.Playbook
+		vars        []string = ansibleCR.Spec.Vars
+		redisStream          = os.Getenv("REDIS_STREAM")
 	)
 
 	fmt.Println("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
@@ -103,7 +104,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	if enqueueDataInRedisStreams(inventoryStreamValues) {
-		log.Info("VALUES ENQUEUE IN REDIS STREAM ", os.Getenv("REDIS_STREAM"))
+		log.Info("⚡️ VALUES ENQUEUE IN REDIS STREAM ⚡️", redisStream)
 	}
 
 	// for range time.Tick(time.Second * 10) {
