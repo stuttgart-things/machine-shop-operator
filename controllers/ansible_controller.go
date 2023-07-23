@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	sthingsCli "github.com/stuttgart-things/sthingsCli"
 
 	"github.com/stuttgart-things/redisqueue"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
@@ -117,7 +118,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if retries != 5 {
 
 			retries = retries + 1
-			if checkForRedisKV(inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created") {
+			if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created") {
 				fmt.Println(inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created")
 				break
 			}
@@ -183,46 +184,6 @@ func enqueueDataInRedisStreams(redisValues map[string]interface{}) (enqueue bool
 		panic(redisStreamErr)
 	} else {
 		enqueue = true
-	}
-
-	return
-}
-
-func checkForRedisKV(key, expectedValue string) (keyValueExists bool) {
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       0,
-	})
-
-	// CHECK IF KEY EXISTS IN REDIS
-	fmt.Println("CHECKING IF KEY " + key + " EXISTS..")
-	keyExists, err := rdb.Exists(context.TODO(), key).Result()
-	if err != nil {
-		panic(err)
-	}
-
-	// CHECK FOR VALUE/STATUS IN REDIS
-	if keyExists == 1 {
-
-		fmt.Println("KEY " + key + " EXISTS..CHECKING FOR IT'S VALUE")
-
-		value, err := rdb.Get(context.TODO(), key).Result()
-		if err != nil {
-			panic(err)
-		}
-
-		if value == expectedValue {
-			fmt.Println("STATUS", value)
-			keyValueExists = true
-		}
-
-		fmt.Println("STATUS", value)
-
-	} else {
-
-		fmt.Println("KEY " + key + " DOES NOT EXIST)")
 	}
 
 	return
