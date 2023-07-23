@@ -94,7 +94,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	inventoryStreamValues := make(map[string]interface{})
 	inventoryStreamValues["template"] = "inventory.gotmpl"
 	inventoryStreamValues["name"] = req.Name
-	inventoryStreamValues["namespace"] = "machine-shop"
+	inventoryStreamValues["namespace"] = "machine-shop-packer"
 
 	// CREATE VALUES FOR INVENTORY
 	for _, groups := range hosts {
