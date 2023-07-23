@@ -23,10 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	sthingsCli "github.com/stuttgart-things/sthingsCli"
 
-	"github.com/stuttgart-things/redisqueue"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -106,13 +104,12 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
-	if enqueueDataInRedisStreams(inventoryStreamValues) {
+	if sthingsCli.EnqueueDataInRedisStreams(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_STREAM"), inventoryStreamValues) {
 		fmt.Println("⚡️ VALUES ENQUEUE IN REDIS STREAM ⚡️ " + redisStream)
 	}
 
 	// CHECK FOR VALUES IN REDIS
 	retries := 0
-
 	for range time.Tick(time.Second * 5) {
 
 		if retries != 5 {
@@ -125,7 +122,6 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		} else {
 			fmt.Println("retries are exhausted..exiting")
-
 			break
 		}
 
@@ -155,36 +151,6 @@ func createInventoryValues(groups string) (groupName string, hosts string) {
 	group := strings.Split(groups, ":")
 	groupName = strings.TrimSpace(group[0])
 	hosts = group[1]
-
-	return
-}
-
-func enqueueDataInRedisStreams(redisValues map[string]interface{}) (enqueue bool) {
-
-	producer, err := redisqueue.NewProducerWithOptions(&redisqueue.ProducerOptions{
-		MaxLen:               10000,
-		ApproximateMaxLength: true,
-		RedisClient: redis.NewClient(&redis.Options{
-			Addr:     os.Getenv("REDIS_SERVER") + ":" + os.Getenv("REDIS_PORT"),
-			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       0,
-		}),
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	redisStreamErr := producer.Enqueue(&redisqueue.Message{
-		Stream: os.Getenv("REDIS_STREAM"),
-		Values: redisValues,
-	})
-
-	if redisStreamErr != nil {
-		panic(redisStreamErr)
-	} else {
-		enqueue = true
-	}
 
 	return
 }
