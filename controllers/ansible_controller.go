@@ -47,8 +47,9 @@ var (
 		"playbook":  "cm",
 		"job":       "job",
 	}
-	maxResourceCheckRetries = 10
-	ansibleJobNamespace     = os.Getenv("ANSIBLE_JOB_NAMESPACE")
+	maxResourceCheckRetries   = 10
+	intervalResourceChecks, _ = time.ParseDuration("5s")
+	ansibleJobNamespace       = os.Getenv("ANSIBLE_JOB_NAMESPACE")
 )
 
 // AnsibleReconciler reconciles a Ansible object
@@ -125,7 +126,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// CHECK FOR VALUES IN REDIS
 	try := 0
-	for range time.Tick(time.Second * 5) {
+	for range time.Tick(time.Second * intervalResourceChecks) {
 
 		if try <= maxResourceCheckRetries {
 
