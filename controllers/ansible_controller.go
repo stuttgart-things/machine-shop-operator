@@ -47,8 +47,8 @@ var (
 		"playbook":  "cm",
 		"job":       "job",
 	}
-	checkAnsibleResourceRetries = 10
-	ansibleJobNamespace         = os.Getenv("ANSIBLE_JOB_NAMESPACE")
+	maxResourceCheckRetries = 10
+	ansibleJobNamespace     = os.Getenv("ANSIBLE_JOB_NAMESPACE")
 )
 
 // AnsibleReconciler reconciles a Ansible object
@@ -124,11 +124,12 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// CHECK FOR VALUES IN REDIS
+	try := 0
 	for range time.Tick(time.Second * 5) {
 
-		if checkAnsibleResourceRetries != 5 {
+		if try <= maxResourceCheckRetries {
 
-			checkAnsibleResourceRetries++
+			try++
 			if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created") {
 				fmt.Println(inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created")
 				break
