@@ -36,6 +36,21 @@ import (
 	machineshopv1beta1 "github.com/stuttgart-things/machine-shop-operator/api/v1beta1"
 )
 
+var (
+	templates = map[string]string{
+		"inventory": "inventory.gotmpl",
+		"playbook":  "playbook.gotmpl",
+		"job":       "job.gotmpl",
+	}
+	kinds = map[string]string{
+		"inventory": "cm",
+		"playbook":  "cm",
+		"job":       "job",
+	}
+	checkAnsibleResourceRetries = 10
+	ansibleJobNamespace         = os.Getenv("ANSIBLE_JOB_NAMESPACE")
+)
+
 // AnsibleReconciler reconciles a Ansible object
 type AnsibleReconciler struct {
 	client.Client
@@ -92,10 +107,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// INVENTORY VALUES
 	inventoryStreamValues := make(map[string]interface{})
-	inventoryStreamValues["template"] = "inventory.gotmpl"
+	inventoryStreamValues["template"] = templates["inventory"]
 	inventoryStreamValues["name"] = req.Name
-	inventoryStreamValues["namespace"] = "machine-shop-packer"
-	inventoryStreamValues["kind"] = "cm"
+	inventoryStreamValues["namespace"] = ansibleJobNamespace
+	inventoryStreamValues["kind"] = kinds["inventory"]
 
 	// CREATE VALUES FOR INVENTORY
 	for _, groups := range hosts {
@@ -109,12 +124,11 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// CHECK FOR VALUES IN REDIS
-	retries := 0
 	for range time.Tick(time.Second * 5) {
 
-		if retries != 5 {
+		if checkAnsibleResourceRetries != 5 {
 
-			retries = retries + 1
+			checkAnsibleResourceRetries++
 			if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created") {
 				fmt.Println(inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created")
 				break
@@ -126,13 +140,6 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 
 	}
-
-	// ADD CHECK HERE
-	// for range time.Tick(time.Second * 10) {
-	// 	if checkForAnsibleJob(playbook) {
-	// 		break
-	// 	}
-	// }
 
 	fmt.Println("ANSIBLE " + playbook + " PLAYBOOK-FINISHED!")
 

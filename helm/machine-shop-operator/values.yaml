@@ -117,8 +117,10 @@ configmaps:
   #               name: ansible
   # informer:
   #   INFORMING_NAMESPACE: machine-shop
-  environment:
-    WEBHOOK_URL: ""
+  #environment:
+  #ENABLE_WEBHOOK: "yes"
+  #WEBHOOK_URL: ""
+  #ANSIBLE_JOB_NAMESPACE: machine-shop-packer
   terraform-templates:
     vsphere-vm: |
       module "{{`{{ .moduleName }}`}}" {
@@ -427,7 +429,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0723.1642-v0.1.98-ANSIBLE-CR'
+      tag: '23.0723.1741-v0.1.99-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
