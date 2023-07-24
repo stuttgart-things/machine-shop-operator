@@ -50,6 +50,7 @@ var (
 	maxResourceCheckRetries   = 10
 	intervalResourceChecks, _ = time.ParseDuration("5s")
 	ansibleJobNamespace       = os.Getenv("ANSIBLE_JOB_NAMESPACE")
+	redisStream               = os.Getenv("REDIS_STREAM")
 )
 
 // AnsibleReconciler reconciles a Ansible object
@@ -75,6 +76,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	_ = log.FromContext(ctx)
 
 	log := ctrllog.FromContext(ctx)
+	fmt.Println("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
+
 	log.Info("⚡️ Event received! ⚡️")
 	log.Info("Request: ", "req", req)
 
@@ -92,24 +95,15 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// GET VARIABLES FROM CR + ENV
 	var (
-		hosts       []string = ansibleCR.Spec.Hosts
-		playbook    string   = ansibleCR.Spec.Playbook
-		vars        []string = ansibleCR.Spec.Vars
-		redisStream          = os.Getenv("REDIS_STREAM")
+		hosts    []string = ansibleCR.Spec.Hosts
+		playbook string   = ansibleCR.Spec.Playbook
+		vars     []string = ansibleCR.Spec.Vars
 	)
-
-	fmt.Println("REDIS_SERVER", os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"))
-	fmt.Println(hosts)
-
-	fmt.Println("playbook", playbook)
-	fmt.Println(vars)
-
-	// GET VARIABLES FROM CR
 
 	// INVENTORY VALUES
 	inventoryStreamValues := make(map[string]interface{})
 	inventoryStreamValues["template"] = templates["inventory"]
-	inventoryStreamValues["name"] = req.Name
+	inventoryStreamValues["name"] = req.Name + "-inv"
 	inventoryStreamValues["namespace"] = ansibleJobNamespace
 	inventoryStreamValues["kind"] = kinds["inventory"]
 
@@ -118,6 +112,18 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		groupName, hosts := createInventoryValues(groups)
 		inventoryStreamValues[groupName] = hosts
 	}
+
+	fmt.Println("playbook", playbook)
+	fmt.Println(vars)
+
+	// PLAYBOOK VALUES
+	playbookStreamValues := make(map[string]interface{})
+	playbookStreamValues["template"] = playbook
+	playbookStreamValues["name"] = req.Name + "-play"
+	playbookStreamValues["namespace"] = ansibleJobNamespace
+	playbookStreamValues["kind"] = kinds["playbook"]
+
+	fmt.Println("PLAYBOOK", playbookStreamValues)
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	if sthingsCli.EnqueueDataInRedisStreams(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_STREAM"), inventoryStreamValues) {
