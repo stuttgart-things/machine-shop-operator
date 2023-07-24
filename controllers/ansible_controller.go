@@ -109,12 +109,11 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// CREATE VALUES FOR INVENTORY
 	for _, groups := range hosts {
-		groupName, hosts := createInventoryValues(groups)
+		groupName, hosts := splitVars(groups)
 		inventoryStreamValues[groupName] = hosts
 	}
 
 	fmt.Println("playbook", playbook)
-	fmt.Println(vars)
 
 	// PLAYBOOK VALUES
 	playbookStreamValues := make(map[string]interface{})
@@ -122,6 +121,11 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	playbookStreamValues["name"] = req.Name + "-play"
 	playbookStreamValues["namespace"] = ansibleJobNamespace
 	playbookStreamValues["kind"] = kinds["playbook"]
+
+	for _, groups := range vars {
+		varName, value := splitVars(groups)
+		playbookStreamValues[varName] = value
+	}
 
 	fmt.Println("PLAYBOOK", playbookStreamValues)
 
@@ -161,11 +165,11 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func createInventoryValues(groups string) (groupName string, hosts string) {
+func splitVars(groups string) (groupName string, entities string) {
 
 	group := strings.Split(groups, ":")
 	groupName = strings.TrimSpace(group[0])
-	hosts = group[1]
+	entities = group[1]
 
 	return
 }
