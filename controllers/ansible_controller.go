@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	sthingsCli "github.com/stuttgart-things/sthingsCli"
@@ -100,6 +99,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		vars     []string = ansibleCR.Spec.Vars
 	)
 
+	fmt.Println(hosts, vars)
+
 	// INVENTORY VALUES
 	inventoryStreamValues := make(map[string]interface{})
 	inventoryStreamValues["template"] = templates["inventory"]
@@ -110,10 +111,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	fmt.Println("playbook", playbook)
 
 	// CREATE VALUES FOR INVENTORY
-	for _, groups := range hosts {
-		groupName, hosts := createInventoryValues(groups)
-		inventoryStreamValues[groupName] = hosts
-	}
+	// for _, groups := range hosts {
+	// 	groupName, hosts := createInventoryValues(groups)
+	// 	inventoryStreamValues[groupName] = hosts
+	// }
 
 	// PLAYBOOK VALUES
 	playbookStreamValues := make(map[string]interface{})
@@ -122,10 +123,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	playbookStreamValues["namespace"] = ansibleJobNamespace
 	playbookStreamValues["kind"] = kinds["playbook"]
 
-	for _, groups := range vars {
-		varName, value := createInventoryValues(groups)
-		playbookStreamValues[varName] = value
-	}
+	// for _, groups := range vars {
+	// 	varName, value := createInventoryValues(groups)
+	// 	playbookStreamValues[varName] = value
+	// }
 
 	fmt.Println("PLAYBOOK", playbookStreamValues)
 
@@ -165,11 +166,11 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func createInventoryValues(groups string) (groupName string, hosts string) {
+// func createInventoryValues(groups string) (groupName string, hosts string) {
 
-	group := strings.Split(groups, ":")
-	groupName = strings.TrimSpace(group[0])
-	hosts = group[1]
+// 	group := strings.Split(groups, ":")
+// 	groupName = strings.TrimSpace(group[0])
+// 	hosts = group[1]
 
-	return
-}
+// 	return
+// }
