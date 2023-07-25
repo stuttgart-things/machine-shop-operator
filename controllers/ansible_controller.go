@@ -43,8 +43,8 @@ var (
 		"job":       "job.gotmpl",
 	}
 	kinds = map[string]string{
-		"inventory": "cm",
-		"playbook":  "cm",
+		"inventory": "ConfigMap",
+		"playbook":  "ConfigMap",
 		"job":       "job",
 	}
 	maxResourceCheckRetries = 10
@@ -115,7 +115,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// PLAYBOOK VALUES
 	playbookStreamValues := make(map[string]interface{})
-	playbookStreamValues["template"] = playbook
+	playbookStreamValues["template"] = templates["inventory"]
+	playbookStreamValues["playbook"] = playbook
 	playbookStreamValues["name"] = req.Name + "-play"
 	playbookStreamValues["namespace"] = ansibleJobNamespace
 	playbookStreamValues["kind"] = kinds["playbook"]
@@ -148,7 +149,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			if try <= maxResourceCheckRetries {
 
 				try++
-				if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), streamValues["name"].(string), "created") {
+				if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), kinds["inventory"]+"-"+streamValues["name"].(string), "created") {
 
 					fmt.Println(streamValues["name"], "created")
 					break
