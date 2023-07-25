@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	sthingsCli "github.com/stuttgart-things/sthingsCli"
@@ -112,8 +113,8 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	//CREATE VALUES FOR INVENTORY
 	for _, groups := range hosts {
 		fmt.Println(groups)
-		// groupName, hosts := createInventoryValues(groups)
-		// inventoryStreamValues[groupName] = hosts
+		groupName, hosts := createInventoryValues(groups)
+		inventoryStreamValues[groupName] = hosts
 	}
 
 	// PLAYBOOK VALUES
@@ -165,11 +166,11 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-// func createInventoryValues(groups string) (groupName string, hosts string) {
+func createInventoryValues(groups string) (groupName string, hosts string) {
 
-// 	group := strings.Split(groups, ":")
-// 	groupName = strings.TrimSpace(group[0])
-// 	hosts = group[1]
+	group := strings.Split(groups, ":")
+	groupName = strings.TrimSpace(group[0])
+	hosts = group[1]
 
-// 	return
-// }
+	return
+}
