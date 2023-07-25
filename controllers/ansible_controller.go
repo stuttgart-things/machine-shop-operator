@@ -113,6 +113,28 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		inventoryStreamValues[groupName] = hosts
 	}
 
+	// PLAYBOOK VALUES
+	playbookStreamValues := make(map[string]interface{})
+	playbookStreamValues["template"] = playbook
+	playbookStreamValues["name"] = req.Name + "-play"
+	playbookStreamValues["namespace"] = ansibleJobNamespace
+	playbookStreamValues["kind"] = kinds["playbook"]
+
+	//CREATE VALUES FOR PLAYBOOK VARS
+	for _, varNames := range vars {
+		varName, value := createCrListVars(varNames)
+		playbookStreamValues[varName] = value
+	}
+
+	fmt.Println("ALL PLAYBOOK VALUES", playbookStreamValues)
+
+	var allValues []interface{}
+
+	allValues = append(allValues, inventoryStreamValues)
+	allValues = append(allValues, playbookStreamValues)
+
+	fmt.Println("ALLVALUES", allValues)
+
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	if sthingsCli.EnqueueDataInRedisStreams(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_STREAM"), inventoryStreamValues) {
 		fmt.Println("⚡️ VALUES ENQUEUE IN REDIS STREAM ⚡️ " + redisStream)
@@ -136,21 +158,6 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 
 	}
-
-	// PLAYBOOK VALUES
-	playbookStreamValues := make(map[string]interface{})
-	playbookStreamValues["template"] = playbook
-	playbookStreamValues["name"] = req.Name + "-play"
-	playbookStreamValues["namespace"] = ansibleJobNamespace
-	playbookStreamValues["kind"] = kinds["playbook"]
-
-	//CREATE VALUES FOR PLAYBOOK VARS
-	for _, varNames := range vars {
-		varName, value := createCrListVars(varNames)
-		playbookStreamValues[varName] = value
-	}
-
-	fmt.Println("ALL PLAYBOOK VALUES", playbookStreamValues)
 
 	fmt.Println("ANSIBLE " + playbook + " PLAYBOOK-FINISHED!")
 
