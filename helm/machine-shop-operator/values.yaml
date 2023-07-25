@@ -429,7 +429,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.0725.0734-v0.1.113-ANSIBLE-CR'
+      tag: '23.0725.0758-v0.1.114-ANSIBLE-CR'
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
