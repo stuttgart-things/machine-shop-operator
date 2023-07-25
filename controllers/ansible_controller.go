@@ -110,11 +110,12 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	fmt.Println("playbook", playbook)
 
-	// CREATE VALUES FOR INVENTORY
-	// for _, groups := range hosts {
-	// 	groupName, hosts := createInventoryValues(groups)
-	// 	inventoryStreamValues[groupName] = hosts
-	// }
+	//CREATE VALUES FOR INVENTORY
+	for _, groups := range hosts {
+		fmt.Println(groups)
+		// groupName, hosts := createInventoryValues(groups)
+		// inventoryStreamValues[groupName] = hosts
+	}
 
 	// PLAYBOOK VALUES
 	playbookStreamValues := make(map[string]interface{})
