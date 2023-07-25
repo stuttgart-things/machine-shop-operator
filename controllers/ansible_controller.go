@@ -50,6 +50,9 @@ var (
 	maxResourceCheckRetries = 10
 	ansibleJobNamespace     = os.Getenv("ANSIBLE_JOB_NAMESPACE")
 	redisStream             = os.Getenv("REDIS_STREAM")
+	allStreamValues         []interface{}
+	inventoryStreamValues   = make(map[string]interface{})
+	playbookStreamValues    = make(map[string]interface{})
 )
 
 // AnsibleReconciler reconciles a Ansible object
@@ -100,7 +103,6 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	)
 
 	// INVENTORY VALUES
-	inventoryStreamValues := make(map[string]interface{})
 	inventoryStreamValues["template"] = templates["inventory"]
 	inventoryStreamValues["name"] = req.Name + "-inv"
 	inventoryStreamValues["namespace"] = ansibleJobNamespace
@@ -114,8 +116,7 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// PLAYBOOK VALUES
-	playbookStreamValues := make(map[string]interface{})
-	playbookStreamValues["template"] = templates["inventory"]
+	playbookStreamValues["template"] = templates["playbook"]
 	playbookStreamValues["playbook"] = playbook
 	playbookStreamValues["name"] = req.Name + "-play"
 	playbookStreamValues["namespace"] = ansibleJobNamespace
@@ -127,14 +128,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		playbookStreamValues[varName] = value
 	}
 
-	fmt.Println("ALL PLAYBOOK VALUES", playbookStreamValues)
+	allStreamValues = append(allStreamValues, inventoryStreamValues)
+	allStreamValues = append(allStreamValues, playbookStreamValues)
 
-	var allValues []interface{}
-
-	allValues = append(allValues, inventoryStreamValues)
-	allValues = append(allValues, playbookStreamValues)
-
-	for _, values := range allValues {
+	for _, values := range allStreamValues {
 		streamValues, _ := values.(map[string]interface{})
 		fmt.Println("ENQUEUING", streamValues["name"])
 
