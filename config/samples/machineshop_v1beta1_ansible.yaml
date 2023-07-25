@@ -19,3 +19,4 @@ spec:
   vars:
   - 'manage_filesystem: true'
   - 'update_os: true'
+  - 'installVaultCa: true'

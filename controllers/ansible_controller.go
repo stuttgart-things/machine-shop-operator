@@ -124,10 +124,9 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	playbookStreamValues["namespace"] = ansibleJobNamespace
 	playbookStreamValues["kind"] = kinds["playbook"]
 
-	// for _, groups := range vars {
-	// 	varName, value := createInventoryValues(groups)
-	// 	playbookStreamValues[varName] = value
-	// }
+	for _, varNames := range vars {
+		fmt.Println(varNames)
+	}
 
 	fmt.Println("PLAYBOOK", playbookStreamValues)
 
