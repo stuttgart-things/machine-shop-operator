@@ -133,7 +133,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	allValues = append(allValues, inventoryStreamValues)
 	allValues = append(allValues, playbookStreamValues)
 
-	fmt.Println("ALLVALUES", allValues)
+	for _, values := range allValues {
+		m, _ := values.(map[string]interface{})
+		fmt.Println("TTTEMPLATE", m["name"])
+	}
 
 	// ENQUEUE INVENTORY IN REDIS STREAMS
 	if sthingsCli.EnqueueDataInRedisStreams(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_STREAM"), inventoryStreamValues) {
