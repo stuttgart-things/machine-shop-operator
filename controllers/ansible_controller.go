@@ -140,25 +140,26 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if sthingsCli.EnqueueDataInRedisStreams(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_STREAM"), streamValues) {
 			fmt.Println("⚡️ VALUES ENQUEUE IN REDIS STREAM ⚡️ " + redisStream)
 		}
-	}
 
-	// CHECK FOR VALUES IN REDIS
-	try := 0
-	for range time.Tick(time.Second * 5) {
+		// CHECK FOR VALUES IN REDIS
+		try := 0
+		for range time.Tick(time.Second * 5) {
 
-		if try <= maxResourceCheckRetries {
+			if try <= maxResourceCheckRetries {
 
-			try++
-			if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created") {
-				fmt.Println(inventoryStreamValues["kind"].(string)+"-"+inventoryStreamValues["name"].(string), "created")
+				try++
+				if sthingsCli.CheckRedisKV(os.Getenv("REDIS_SERVER")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), streamValues["name"].(string), "created") {
+
+					fmt.Println(streamValues["name"], "created")
+					break
+				}
+
+			} else {
+				fmt.Println("retries are exhausted..exiting")
 				break
 			}
 
-		} else {
-			fmt.Println("retries are exhausted..exiting")
-			break
 		}
-
 	}
 
 	fmt.Println("ANSIBLE " + playbook + " PLAYBOOK-FINISHED!")
