@@ -11,6 +11,10 @@ helm upgrade --install machine-shop-operator \
 oci://eu.gcr.io/stuttgart-things/machine-shop-operator:v0.1.62 \
 -n machine-shop-operator-system --create-namespace
 ```
+## DEV
+```
+kubectl -n machine-shop-operator-system logs -f $(kubectl -n machine-shop-operator-system get po | grep operator | awk '{ print $1}') -c manager
+```
 
 ## RESOURCES/LIFECYCLE
 </details>
