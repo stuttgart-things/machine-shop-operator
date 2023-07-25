@@ -99,8 +99,6 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		vars     []string = ansibleCR.Spec.Vars
 	)
 
-	fmt.Println(hosts, vars)
-
 	// INVENTORY VALUES
 	inventoryStreamValues := make(map[string]interface{})
 	inventoryStreamValues["template"] = templates["inventory"]
@@ -108,12 +106,10 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	inventoryStreamValues["namespace"] = ansibleJobNamespace
 	inventoryStreamValues["kind"] = kinds["inventory"]
 
-	fmt.Println("playbook", playbook)
-
 	//CREATE VALUES FOR INVENTORY
 	for _, groups := range hosts {
 		fmt.Println(groups)
-		groupName, hosts := createInventoryValues(groups)
+		groupName, hosts := createCrListVars(groups)
 		inventoryStreamValues[groupName] = hosts
 	}
 
@@ -148,13 +144,13 @@ func (r *AnsibleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	playbookStreamValues["namespace"] = ansibleJobNamespace
 	playbookStreamValues["kind"] = kinds["playbook"]
 
+	//CREATE VALUES FOR PLAYBOOK VARS
 	for _, varNames := range vars {
-		fmt.Println(varNames)
-		groupName, hosts := createInventoryValues(varNames)
-		playbookStreamValues[groupName] = hosts
+		varName, value := createCrListVars(varNames)
+		playbookStreamValues[varName] = value
 	}
 
-	fmt.Println("PLAYBOOK", playbookStreamValues)
+	fmt.Println("ALL PLAYBOOK VALUES", playbookStreamValues)
 
 	fmt.Println("ANSIBLE " + playbook + " PLAYBOOK-FINISHED!")
 
@@ -168,11 +164,11 @@ func (r *AnsibleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func createInventoryValues(groups string) (groupName string, hosts string) {
+func createCrListVars(groups string) (varName string, values string) {
 
 	group := strings.Split(groups, ":")
-	groupName = strings.TrimSpace(group[0])
-	hosts = group[1]
+	varName = strings.TrimSpace(group[0])
+	values = group[1]
 
 	return
 }
