@@ -17,6 +17,6 @@ spec:
   - 'merge-inventory;master;worker:'
   playbook: base-os
   vars:
-  - 'manage_filesystem: true'
-  - 'update_os: true'
+  - 'manageFilesystem: true'
+  - 'updateOS: true'
   - 'installVaultCa: true'
