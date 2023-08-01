@@ -18,5 +18,13 @@ spec:
   playbook: base-os
   vars:
   - 'manageFilesystem: true'
+  - 'installRequirements: true'
   - 'updateOS: true'
-  - 'installVaultCa: true'
+  - 'installMotd: true'
+  - 'username: sthings'
+  - 'lvmHomeSizing: 15'
+  - 'lvmRootSizing: 35'
+  - 'lvmVarSizing: 50'
+  - 'sendToMSteams: true'
+  - 'msteamsWebhhookURL: tbd'
+  - 'rebootAll: true'
