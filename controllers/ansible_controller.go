@@ -176,7 +176,7 @@ func createCrListVars(groups string) (varName string, values string) {
 
 	group := strings.Split(groups, ":")
 	varName = strings.TrimSpace(group[0])
-	values = group[1]
+	values = strings.TrimSpace(group[1])
 
 	return
 }
