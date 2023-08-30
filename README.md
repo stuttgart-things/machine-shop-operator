@@ -1,6 +1,6 @@
 # stuttgart-things/machine-shop-operator
 
-machine-shop-operator allows you to manage the lifecycle of terraform resources through custom resources
+manage the lifecycle of terraform resources w/ custom resources on k8s
 
 ## DEPLOYMENT
 
