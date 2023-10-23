@@ -7,9 +7,26 @@ manage the lifecycle of terraform resources w/ custom resources on k8s
 <details><summary>LATEST DEV RELEASE</summary>
 
 ```
+cat <<EOF > ./values.yaml
+secrets:
+  vault:
+    name: vault
+    labels:
+      app.kubernetes.io/component: manager
+      app.kubernetes.io/created-by: machine-shop-operator
+      app.kubernetes.io/instance: controller-manager
+      app.kubernetes.io/part-of: machine-shop-operator
+    dataType: stringData
+    secretKVs:
+      VAULT_NAMESPACE: <path:apps/data/vault#namespace>
+      VAULT_ADDR: <path:apps/data/vault#addr>
+      VAULT_ROLE_ID: <path:apps/data/vault#roleID>
+      VAULT_SECRET_ID: <path:apps/data/vault#secretID>
+EOF
+
 helm upgrade --install machine-shop-operator \
 oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version v0.1.121 \
--n machine-shop-operator-system --create-namespace
+-n machine-shop-operator-system --values ./values.yaml --create-namespace
 ```
 
 ## RESOURCES/LIFECYCLE
