@@ -8,7 +8,7 @@ manage the lifecycle of terraform resources w/ custom resources on k8s
 
 ```
 helm upgrade --install machine-shop-operator \
-oci://eu.gcr.io/stuttgart-things/machine-shop-operator:v0.1.62 \
+oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version v0.1.121\
 -n machine-shop-operator-system --create-namespace
 ```
 
