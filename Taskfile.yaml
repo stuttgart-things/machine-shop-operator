@@ -1,8 +1,10 @@
 ---
 version: 3
 vars:
-  REGISTRY: eu.gcr.io
-  REPOSITORY_NAME: stuttgart-things
+  # REGISTRY: eu.gcr.io
+  # REPOSITORY_NAME: stuttgart-things
+  REGISTRY: scr.cd43.sthings-pve.labul.sva.de
+  REPOSITORY_NAME: machine-shop-operator
   MODULE: github.com/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}
   CONTAINER_RUNTIME_CMD: sudo nerdctl
   CONTROLLER_GEN_CMD: "./bin/controller-gen"
