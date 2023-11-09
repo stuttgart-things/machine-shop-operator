@@ -2,11 +2,42 @@
 
 manage the lifecycle of terraform resources w/ custom resources on k8s
 
+## DEV-TASKS
+
+```bash
+task --list: Available tasks for this project:
+* build-image:             Build image
+* crds:                    Generate crds
+* deploy:                  Build image & deploy
+* deploy-crds:             Generate and deploy crds
+* install-kustomize:       Download and install-kustomize
+* lint:                    Lint code
+* package:                 Update Chart.yaml and package archive
+* push:                    Push to registry
+* tag:                     commit, push & tag the module
+* test:                    Test code
+```
+
 ## DEPLOYMENT
+
+<details><summary>HELMFILE</summary>
+
+## APPLY TO ENV
+
+```bash
+export VAULT_NAMESPACE=root
+export VAULT_TOKEN=<VAULT_TOKEN>
+export VAULT_ADDR=https://vault-vsphere.tiab.labda.sva.de:8200
+
+helmfile diff --environment labda
+helmfile apply --environment labda
+```
+
+</details>
 
 <details><summary>LATEST DEV RELEASE</summary>
 
-```
+```yaml
 cat <<EOF > ./values.yaml
 secrets:
   vault:
@@ -29,7 +60,6 @@ oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version v0.1.121 \
 -n machine-shop-operator-system --values ./values.yaml --create-namespace
 ```
 
-## RESOURCES/LIFECYCLE
 </details>
 
 
@@ -37,7 +67,7 @@ oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version v0.1.121 \
 
 <details><summary>EXAMPLE-VSPHERE-VM</summary>
 
-```
+```yaml
 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
 kind: Terraform
 metadata:
@@ -86,7 +116,7 @@ spec:
 
 <details><summary>EXAMPLE-PVE-VM</summary>
 
-```
+```yaml
 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
 kind: Terraform
 metadata:
