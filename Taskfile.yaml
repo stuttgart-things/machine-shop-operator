@@ -34,6 +34,8 @@ tasks:
     desc: Download and install-kustomize
     cmds:
       - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
+      - sudo mv kustomize /usr/bin/kustomize
+      - sudo chmod +x /usr/bin/kustomize
 
   lint:
     desc: Lint code
