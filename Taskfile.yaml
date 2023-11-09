@@ -9,6 +9,7 @@ vars:
   CONTAINER_RUNTIME_CMD: sudo nerdctl
   CONTROLLER_GEN_CMD: "./bin/controller-gen"
   KUSTOMIZE_CMD: /usr/bin/kustomize
+
   PROJECT_NAME:
     sh: pwd | grep -o "[^/]*$"
   MAJOR:
