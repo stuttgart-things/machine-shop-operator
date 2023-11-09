@@ -30,7 +30,7 @@ vars:
 
 tasks:
   install-kustomize:
-    desc: Download + install-kustomize
+    desc: Download and install-kustomize
     cmds:
       - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
 
