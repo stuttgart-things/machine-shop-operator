@@ -4,5 +4,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: eu.gcr.io/stuttgart-things/machine-shop-operator
-  newTag: 23.0621.0919-v0.1.53
+  newName: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator/machine-shop-operator
+  newTag: 23.1109.1912-v0.1.58
