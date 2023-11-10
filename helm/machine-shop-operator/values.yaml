@@ -322,8 +322,8 @@ deployment:
         terraform-templates:
           mountPath: /terraform/
           volumeKind: emptyDir
-      image: eu.gcr.io/stuttgart-things/machine-shop-operator
-      tag: '23.1109.1912-v0.1.58'
+      image: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator/machine-shop-operator
+      tag: 23.1110.0806-v0.1.59
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:
