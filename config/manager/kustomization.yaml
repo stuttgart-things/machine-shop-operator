@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator/machine-shop-operator
-  newTag: 23.1109.1912-v0.1.58
+  newTag: 23.1110.0806-v0.1.59
