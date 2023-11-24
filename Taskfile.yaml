@@ -112,14 +112,18 @@ tasks:
       - "sed -i 's/appVersion: .*/appVersion: {{ .UPDATED_TAG_VERSION }} /g' ./helm/*/Chart.yaml"
       - yq e -i '.deployment.containers.manager.image = "{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}"' ./helm/*/values.yaml
       - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"' ./helm/*/values.yaml
+      - yq e -i '.releases[1].version = "{{ .UPDATED_TAG_VERSION }}"' ./helmfile.yaml
+      - sed -i 's/{? {./{{ ./g' ./helmfile.yaml
+      - sed -i 's/{? {./{{ ./g' ./helmfile.yaml
       - helm package ./helm/*/
 
   push:
     desc: Push to registry
-    deps: [build-image, package]
+    # deps: [build-image, package]
     cmds:
+      - task: build-image
+      - task: package
       - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
-      - yq e -i '.spec.source.targetRevision = "{{ .UPDATED_TAG_VERSION }}"' argocd/deployment.yaml
       - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz
       - git commit -am 'updated helm chart and argocd deployment for version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} '
       - git push
