@@ -323,7 +323,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator/machine-shop-operator
-      tag: 23.1110.1435-v0.1.60
+      tag: 23.1124.1240-v0.1.62
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:

@@ -104,19 +104,6 @@ tasks:
       VAULT_NAMESPACE: ${VAULT_NAMESPACE}
       VAULT_ADDR: ${VAULT_ADDR}
 
-  package:
-    desc: Update Chart.yaml and package archive
-    cmds:
-      - git add ./helm/*/*
-      - yq e -i '.version = "{{ .UPDATED_TAG_VERSION }}"' ./helm/*/Chart.yaml
-      - "sed -i 's/appVersion: .*/appVersion: {{ .UPDATED_TAG_VERSION }} /g' ./helm/*/Chart.yaml"
-      - yq e -i '.deployment.containers.manager.image = "{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}"' ./helm/*/values.yaml
-      - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"' ./helm/*/values.yaml
-      - yq e -i '.releases[1].version = "{{ .UPDATED_TAG_VERSION }}"' ./helmfile.yaml
-      - sed -i 's/{? {./{{ ./g' ./helmfile.yaml
-      - sed -i 's/{? {./{{ ./g' ./helmfile.yaml
-      - helm package ./helm/*/
-
   push:
     desc: Push to registry
     # deps: [build-image, package]
@@ -130,3 +117,14 @@ tasks:
     vars:
       PACKAGE:
         sh: "ls *tgz* -Art | tail -n 1"
+
+  package:
+    desc: Update Chart.yaml and package archive
+    cmds:
+      - git add ./helm/*/*
+      - yq e -i '.version = "{{ .UPDATED_TAG_VERSION }}"' ./helm/*/Chart.yaml
+      - "sed -i 's/appVersion: .*/appVersion: {{ .UPDATED_TAG_VERSION }} /g' ./helm/*/Chart.yaml"
+      - yq e -i '.deployment.containers.manager.image = "{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}"' ./helm/*/values.yaml
+      - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"' ./helm/*/values.yaml
+      - yq e -i '.releases[0].version = "{{ .UPDATED_TAG_VERSION }}"' ./helmfile.yaml
+      - helm package ./helm/*/

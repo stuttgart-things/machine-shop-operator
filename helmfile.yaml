@@ -1,23 +1,20 @@
 ---
 releases:
-- name: machine-shop-operator
-  namespace: machine-shop-operator-system
-  chart: machine-shop-operator/machine-shop-operator
-  version: v0.1.60
-  installed: true
-  values:
-    - "env/values.yaml.gotmpl"
-
+  - name: machine-shop-operator
+    namespace: machine-shop-operator-system
+    chart: machine-shop-operator/machine-shop-operator
+    version: v0.1.62
+    installed: true
+    values:
+      - "env/values.yaml.gotmpl"
 environments:
   labul-vsphere:
     values:
       - env/{{ .Environment.Name }}.yaml
-
 repositories:
-- name: machine-shop-operator
-  url: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator
-  oci: true
-
+  - name: machine-shop-operator
+    url: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator
+    oci: true
 helmDefaults:
   verify: false
   wait: false
