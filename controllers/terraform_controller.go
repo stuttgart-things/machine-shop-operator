@@ -178,11 +178,10 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	err = tf.Apply(context.Background(), applyOptions...)
 
 	if err != nil {
-		// fmt.Println("ERROR RUNNING APPLY: %s", err)
 		log.Error(err, "TF APPLY ABORTED!")
+	} else {
+		log.Info("TF APPLY DONE!")
 	}
-
-	log.Info("TF APPLY DONE!")
 
 	// EXTRACT LOGGING INFORMATION
 	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)

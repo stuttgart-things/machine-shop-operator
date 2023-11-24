@@ -25,12 +25,12 @@ task --list: Available tasks for this project:
 ## APPLY TO ENV
 
 ```bash
+export VAULT_ADDR=https://vault-vsphere.labul.sva.de:8200
 export VAULT_NAMESPACE=root
 export VAULT_TOKEN=<VAULT_TOKEN>
-export VAULT_ADDR=https://vault-vsphere.tiab.labda.sva.de:8200
 
-helmfile diff --environment labda
-helmfile apply --environment labda
+helmfile diff --environment labul-vsphere
+helmfile sync --environment labul-vsphere
 ```
 
 </details>

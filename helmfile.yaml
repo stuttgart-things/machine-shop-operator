@@ -2,11 +2,21 @@
 releases:
 - name: machine-shop-operator
   namespace: machine-shop-operator-system
-  chart: stuttgart-things/machine-shop-operator
-  version: v0.1.11
+  chart: machine-shop-operator/machine-shop-operator
+  version: v0.1.60
   installed: true
   values:
-    - "values/{{`{{ .Release.Name }}`}}.yaml.gotmpl"
+    - "env/values.yaml.gotmpl"
+
+environments:
+  labul-vsphere:
+    values:
+      - env/{{ .Environment.Name }}.yaml
+
+repositories:
+- name: machine-shop-operator
+  url: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator
+  oci: true
 
 helmDefaults:
   verify: false
@@ -14,13 +24,3 @@ helmDefaults:
   timeout: 600
   recreatePods: false
   force: true
-
-environments:
-  labda:
-    values:
-      - environments/{{ .Environment.Name }}.yaml
-
-repositories:
-- name: stuttgart-things
-  url: eu.gcr.io/stuttgart-things
-  oci: true
