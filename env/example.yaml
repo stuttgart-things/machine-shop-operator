@@ -35,7 +35,7 @@ spec:
   - tfProviderName=vsphere
   - tfProviderSource=hashicorp/vsphere
   - tfProviderVersion=2.5.1
-  - tfVersion=1.5.7
+  - tfVersion=1.6.4
  secrets:
   - vsphere_user=cloud/data/vsphere:username
   - vsphere_password=cloud/data/vsphere:password
@@ -43,4 +43,4 @@ spec:
   - vm_ssh_user=cloud/data/vsphere:vm_ssh_user
   - vm_ssh_password=cloud/data/vsphere:vm_ssh_password
  template: vsphere-vm
- terraform-version: 1.5.7
+ terraform-version: 1.6.4

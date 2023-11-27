@@ -219,9 +219,9 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if msTeamswebhookUrl != "" {
 		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
 		sthingsCli.SendWebhookToTeams(webhook)
-		log.Info("WEBHOOK SENDED", outputInformation)
+		log.Info("WEBHOOK SENDED")
 	} else {
-		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED", outputInformation)
+		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED")
 	}
 
 	return ctrl.Result{}, nil
