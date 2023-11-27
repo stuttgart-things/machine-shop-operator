@@ -87,9 +87,6 @@ tasks:
       - "{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }} ."
       - "{{ .CONTAINER_RUNTIME_CMD }} push {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}"
       - cd config/manager && {{ .KUSTOMIZE_CMD }} edit set image controller={{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}
-    vars:
-      BRANCH:
-        sh: echo {{ .BRANCH }} | sed 's/\//-/g'
 
   deploy-crds:
     desc: Generate and deploy crds
@@ -137,7 +134,7 @@ tasks:
       - yq e -i '.version = "{{ .UPDATED_TAG_VERSION }}"' ./helm/*/Chart.yaml
       - "sed -i 's/appVersion: .*/appVersion: {{ .UPDATED_TAG_VERSION }} /g' ./helm/*/Chart.yaml"
       - yq e -i '.deployment.containers.manager.image = "{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}"' ./helm/*/values.yaml
-      - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"' ./helm/*/values.yaml
+      - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}"' ./helm/*/values.yaml
       - yq e -i '.releases[0].version = "{{ .UPDATED_TAG_VERSION }}"' ./helmfile.yaml
       - helm package ./helm/*/
 
