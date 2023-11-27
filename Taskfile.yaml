@@ -37,6 +37,31 @@ tasks:
       - sudo mv kustomize /usr/bin/kustomize
       - sudo chmod +x /usr/bin/kustomize
 
+  branch:
+    desc: Create branch from main
+    cmds:
+      - git checkout main
+      - git branch
+      - git pull
+      - |
+        echo "Enter to be created (remote) branch:"
+        read BRANCH_NAME;
+        git checkout -b ${BRANCH_NAME}
+        git push origin ${BRANCH_NAME}
+      - git branch
+
+  delete-branch:
+    desc: Delete branch from origin
+    cmds:
+      - git checkout main
+      - git branch
+      - git pull
+      - |
+        echo "Enter to be deleted (remote) branch:"
+        read BRANCH_NAME;
+        git branch -d ${BRANCH_NAME}
+        git push origin -d ${BRANCH_NAME}
+
   lint:
     desc: Lint code
     cmds:
@@ -60,12 +85,9 @@ tasks:
     desc: commit, push & tag the module
     deps: [lint]
     cmds:
+      - task: git-push
       - go mod tidy
-      - git pull
-      - git add *
-      - git config advice.addIgnoredFile false
-      - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} '
-      - git push
+      - git pull --tags
       - git tag -a {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
       - git push origin --tags
 
@@ -106,14 +128,12 @@ tasks:
 
   push:
     desc: Push to registry
-    # deps: [build-image, package]
     cmds:
       - task: build-image
       - task: package
       - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
       - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz
-      - git commit -am 'updated helm chart and argocd deployment for version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} '
-      - git push
+      - task: git-push
     vars:
       PACKAGE:
         sh: "ls *tgz* -Art | tail -n 1"
@@ -128,3 +148,13 @@ tasks:
       - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"' ./helm/*/values.yaml
       - yq e -i '.releases[0].version = "{{ .UPDATED_TAG_VERSION }}"' ./helmfile.yaml
       - helm package ./helm/*/
+
+  git-push:
+    desc: Commit & push the module
+    cmds:
+      - go mod tidy
+      - git pull
+      - git config advice.addIgnoredFile false
+      - git add *
+      - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
+      - git push origin -u {{ .BRANCH }}

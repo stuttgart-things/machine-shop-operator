@@ -80,6 +80,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// GET VARIABLES FROM CR
 	var (
 		tfVersion     string   = terraformCR.Spec.TerraformVersion
+		resourceState string   = terraformCR.Spec.State
 		template      string   = terraformCR.Spec.Template
 		module        []string = terraformCR.Spec.Module
 		backend       []string = terraformCR.Spec.Backend
@@ -129,6 +130,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// PRINT OUT CR
 	fmt.Println("CR-NAME", req.Name)
+	fmt.Println("RESOURCE STATE", resourceState)
 
 	// READ + RENDER TF MODULE TEMPLATE
 	moduleCallTemplate := sthingsBase.ReadFileToVariable("terraform/" + template)
