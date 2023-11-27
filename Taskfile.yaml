@@ -146,7 +146,7 @@ tasks:
       - git pull
       - git config advice.addIgnoredFile false
       - git add *
-      - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
+      - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .TAG_VERSION }}{{ .BRANCH }}'
       - git push origin {{ .BRANCH }}
 
   # INIT TASK

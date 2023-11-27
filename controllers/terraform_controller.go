@@ -86,8 +86,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		backend       []string = terraformCR.Spec.Backend
 		secrets       []string = terraformCR.Spec.Secrets
 		variables     []string = terraformCR.Spec.Variables
-		tfInitOptions []tfexec.InitOption
-		applyOptions  []tfexec.ApplyOption
 	)
 
 	// WORKING DIRS
@@ -95,6 +93,10 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		logfilePath       = "/tmp/" + req.Name + ".log"
 		workingDir        = "/tmp/tf/" + req.Name + "/"
 		msTeamswebhookUrl = "https://365sva.webhook.office.com/webhookb2/2f14a9f8-4736-46dd-9c8c-31547ec37180@0a65cb1e-37d5-41ff-980a-647d9d0e4f0b/IncomingWebhook/a993544595464ce6af4f2f0461d55a17/dc3a27ed-396c-40b7-a9b2-f1a2b6b44efe"
+		tfInitOptions     []tfexec.InitOption
+		applyOptions      []tfexec.ApplyOption
+		destroyOptions    []tfexec.DestroyOption
+		tfOperation       = "APPLY"
 	)
 
 	// GET MODULE PARAMETER
@@ -177,12 +179,22 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
 
-	err = tf.Apply(context.Background(), applyOptions...)
+	// TF APPLY
+	if resourceState != "absent" {
+		err = tf.Apply(context.Background(), applyOptions...)
+	} else {
+		// TFDESTORY
+		tfOperation = "DESTROY"
+		for _, secret := range secrets {
+			destroyOptions = append(destroyOptions, tfexec.Var(strings.TrimSpace(secret)))
+		}
+		err = tf.Destroy(context.Background(), destroyOptions...)
+	}
 
 	if err != nil {
-		log.Error(err, "TF APPLY ABORTED!")
+		log.Error(err, "TERRAFORM "+tfOperation+" ABORTED!")
 	} else {
-		log.Info("TF APPLY DONE!")
+		log.Info("TERRAFORM " + tfOperation + " DONE!")
 	}
 
 	// EXTRACT LOGGING INFORMATION
@@ -196,7 +208,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
 		s := strings.Split(logfileApplyOperation, "Outputs:")
-		fmt.Println("outputInformation:")
+		fmt.Println("OUTPUTINFORMATION:")
 		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
 		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
 		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
@@ -230,12 +242,12 @@ func initalizeTerraform(terraformDir, terraformVersion string) (tf *tfexec.Terra
 
 	execPath, err := installer.Install(context.Background())
 	if err != nil {
-		fmt.Println("Error installing Terraform: %s", err)
+		fmt.Println("ERROR INSTALLING TERRAFORM: %s", err)
 	}
 
 	tf, err = tfexec.NewTerraform(terraformDir, execPath)
 	if err != nil {
-		fmt.Println("Error running Terraform: %s", err)
+		fmt.Println("ERROR RUNNING TERRAFORM: %s", err)
 	}
 
 	return
