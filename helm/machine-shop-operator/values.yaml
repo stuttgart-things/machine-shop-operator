@@ -39,7 +39,8 @@ configmaps:
 
       terraform {
         backend "s3" {
-          endpoint = "{{`{{ .backendEndpoint }}`}}"
+          endpoints = { s3 = "{{`{{ .backendEndpoint }}`}}" }
+          skip_requesting_account_id = true
           key = "{{`{{ .backendKey }}`}}"
           region = "{{`{{ .backendRegion }}`}}"
           bucket = "{{`{{ .backendBucket }}`}}"
