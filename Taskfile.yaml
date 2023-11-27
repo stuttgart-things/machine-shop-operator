@@ -76,7 +76,7 @@ tasks:
       - go mod tidy
       - git fetch --tags --force
       - git pull --tags
-      - git tag -a {{ .BRANCH }}-{{ .UPDATED_TAG_VERSION }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}-{{ .BRANCH }}'
+      - git tag -a {{ .BRANCH }}-{{ .UPDATED_TAG_VERSION }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .BRANCH }}-{{ .UPDATED_TAG_VERSION }}'
       - git push origin --tags -f
 
   build-image:
