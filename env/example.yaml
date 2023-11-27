@@ -2,7 +2,7 @@
 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
 kind: Terraform
 metadata:
- name: sthings5
+ name: sthings6
  namespace: terraform
  labels:
    app.kubernetes.io/created-by: machine-shop-operator
@@ -11,8 +11,8 @@ metadata:
 spec:
  state: absent
  variables:
-  - vsphere_vm_name="sthings5"
-  - vm_count=2
+  - vsphere_vm_name="sthings6"
+  - vm_count=1
   - vm_num_cpus=6
   - vm_memory=4096
   - vm_disk_size=96
@@ -26,8 +26,8 @@ spec:
   - access_key=apps/data/artifacts:accessKey
   - secret_key=apps/data/artifacts:secretKey
  module:
-  - moduleName=sthings5
-  - backendKey=sthings5.tfstate
+  - moduleName=sthings6
+  - backendKey=sthings6.tfstate
   - moduleSourceUrl=https://artifacts.tiab.labda.sva.de/modules/vsphere-vm.zip
   - backendEndpoint=https://artifacts.app.4sthings.tiab.ssc.sva.de
   - backendRegion=main

@@ -92,7 +92,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	var (
 		logfilePath       = "/tmp/" + req.Name + ".log"
 		workingDir        = "/tmp/tf/" + req.Name + "/"
-		msTeamswebhookUrl = "https://365sva.webhook.office.com/webhookb2/2f14a9f8-4736-46dd-9c8c-31547ec37180@0a65cb1e-37d5-41ff-980a-647d9d0e4f0b/IncomingWebhook/a993544595464ce6af4f2f0461d55a17/dc3a27ed-396c-40b7-a9b2-f1a2b6b44efe"
+		msTeamswebhookUrl = os.Getenv("WEBHOOK_URL")
 		tfInitOptions     []tfexec.InitOption
 		applyOptions      []tfexec.ApplyOption
 		destroyOptions    []tfexec.DestroyOption
@@ -216,12 +216,13 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
 	}
 
-	webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
-
-	sthingsCli.SendWebhookToTeams(webhook)
-	log.Info("WEBHOOK SENDED")
-
-	fmt.Println("FOO:", os.Getenv("WEBHOOK_URL"))
+	if msTeamswebhookUrl != "" {
+		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
+		sthingsCli.SendWebhookToTeams(webhook)
+		log.Info("WEBHOOK SENDED", outputInformation)
+	} else {
+		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED", outputInformation)
+	}
 
 	return ctrl.Result{}, nil
 }

@@ -8,3 +8,7 @@ secrets:
       VAULT_ADDR: {{ .Values.vaultAddr }}
       VAULT_ROLE_ID: {{ .Values.vaultRoleID }}
       VAULT_SECRET_ID: {{ .Values.vaultSecretID }}
+
+configmaps:
+  environment:
+    WEBHOOK_URL: "https://365sva.webhook.office.com/webhookb2/2f14a9f8-4736-46dd-9c8c-31547ec37180@0a65cb1e-37d5-41ff-980a-647d9d0e4f0b/IncomingWebhook/a993544595464ce6af4f2f0461d55a17/dc3a27ed-396c-40b7-a9b2-f1a2b6b44efe"
