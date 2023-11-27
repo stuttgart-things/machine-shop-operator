@@ -12,12 +12,6 @@ vars:
 
   PROJECT_NAME:
     sh: pwd | grep -o "[^/]*$"
-  MAJOR:
-    sh: git describe --tags --abbrev=0 | cut -d "." -f1
-  MINOR:
-    sh: git describe --tags --abbrev=0 | cut -d "." -f2
-  PATCH:
-    sh: git describe --tags --abbrev=0 | cut -d "." -f3 |  cut -d "-" -f1
   VERSION:
     sh: git describe --tags --abbrev=0
   DATE:
