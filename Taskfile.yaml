@@ -24,13 +24,6 @@ vars:
     sh: if [ $(git rev-parse --abbrev-ref HEAD) != "main" ]; then echo $(git rev-parse --abbrev-ref HEAD) ; fi
 
 tasks:
-  install-kustomize:
-    desc: Download and install-kustomize
-    cmds:
-      - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
-      - sudo mv kustomize /usr/bin/kustomize
-      - sudo chmod +x /usr/bin/kustomize
-
   branch:
     desc: Create branch from main
     cmds:
@@ -152,3 +145,11 @@ tasks:
       - git add *
       - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
       - git push origin -d {{ .BRANCH }}
+
+  # INIT TASK
+  install-kustomize:
+    desc: Download and install-kustomize
+    cmds:
+      - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
+      - sudo mv kustomize /usr/bin/kustomize
+      - sudo chmod +x /usr/bin/kustomize
