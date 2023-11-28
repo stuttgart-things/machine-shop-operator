@@ -47,6 +47,7 @@ configmaps:
           skip_credentials_validation = true
           skip_metadata_api_check = true
           skip_region_validation = true
+          skip_s3_checksum = true
           force_path_style = true
         }
 
@@ -185,13 +186,14 @@ configmaps:
 
       terraform {
         backend "s3" {
-          endpoint = "{{`{{ .backendEndpoint }}`}}"
+          endpoints = { s3 = "{{`{{ .backendEndpoint }}`}}" }
           key = "{{`{{ .backendKey }}`}}"
           region = "{{`{{ .backendRegion }}`}}"
           bucket = "{{`{{ .backendBucket }}`}}"
           skip_credentials_validation = true
           skip_metadata_api_check = true
           skip_region_validation = true
+          skip_s3_checksum = true
           force_path_style = true
         }
 
