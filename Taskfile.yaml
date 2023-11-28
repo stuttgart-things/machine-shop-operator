@@ -12,12 +12,6 @@ vars:
 
   PROJECT_NAME:
     sh: pwd | grep -o "[^/]*$"
-  MAJOR:
-    sh: git describe --tags --abbrev=0 | cut -d "." -f1
-  MINOR:
-    sh: git describe --tags --abbrev=0 | cut -d "." -f2
-  PATCH:
-    sh: git describe --tags --abbrev=0 | cut -d "." -f3 |  cut -d "-" -f1
   VERSION:
     sh: git describe --tags --abbrev=0
   DATE:
@@ -27,15 +21,35 @@ vars:
   UPDATED_TAG_VERSION:
     sh: t1=$(git describe --tags --abbrev=0 | cut -f1 -d'.'); t2=$(git describe --tags --abbrev=0 | cut -f2 -d'.'); echo $t1.$t2.{{ .UPDATED_TAG }}
   BRANCH:
-    sh: if [ $(git rev-parse --abbrev-ref HEAD) != "main" ]; then echo -$(git rev-parse --abbrev-ref HEAD) ; fi
+    sh: if [ $(git rev-parse --abbrev-ref HEAD) != "main" ]; then echo $(git rev-parse --abbrev-ref HEAD) ; fi
+  TAG_VERSION:
+    sh: "echo {{ .UPDATED_TAG_VERSION }} | sed 's/[^0-9^.]*//g'"
 
 tasks:
-  install-kustomize:
-    desc: Download and install-kustomize
+  branch:
+    desc: Create branch from main
     cmds:
-      - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
-      - sudo mv kustomize /usr/bin/kustomize
-      - sudo chmod +x /usr/bin/kustomize
+      - git checkout main
+      - git branch
+      - git pull
+      - |
+        echo "Enter to be created (remote) branch:"
+        read BRANCH_NAME;
+        git checkout -b ${BRANCH_NAME}
+        git push origin ${BRANCH_NAME}
+      - git branch
+
+  delete-branch:
+    desc: Delete branch from origin
+    cmds:
+      - git checkout main
+      - git branch
+      - git pull
+      - |
+        echo "Enter to be deleted (remote) branch:"
+        read BRANCH_NAME;
+        git branch -d ${BRANCH_NAME}
+        git push origin -d ${BRANCH_NAME}
 
   lint:
     desc: Lint code
@@ -60,22 +74,20 @@ tasks:
     desc: commit, push & tag the module
     deps: [lint]
     cmds:
+      - task: git-push
       - go mod tidy
-      - git pull
-      - git add *
-      - git config advice.addIgnoredFile false
-      - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} '
-      - git push
-      - git tag -a {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}'
-      - git push origin --tags
+      - git fetch --tags --force
+      - git pull --tags
+      - git tag -a {{ .UPDATED_TAG_VERSION }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}'
+      - git push origin --tags -f
 
   build-image:
     desc: Build image
     deps: [tag, crds]
     cmds:
-      - "{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} ."
-      - "{{ .CONTAINER_RUNTIME_CMD }} push {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"
-      - cd config/manager && {{ .KUSTOMIZE_CMD }} edit set image controller={{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}
+      - "{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .TAG_VERSION }} ."
+      - "{{ .CONTAINER_RUNTIME_CMD }} push {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .TAG_VERSION }}"
+      - cd config/manager && {{ .KUSTOMIZE_CMD }} edit set image controller={{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .TAG_VERSION }}
 
   deploy-crds:
     desc: Generate and deploy crds
@@ -106,14 +118,12 @@ tasks:
 
   push:
     desc: Push to registry
-    # deps: [build-image, package]
     cmds:
       - task: build-image
       - task: package
-      - helm push {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
-      - rm -rf {{ .PROJECT_NAME }}-{{ .UPDATED_TAG_VERSION }}.tgz
-      - git commit -am 'updated helm chart and argocd deployment for version {{ .UPDATED_TAG_VERSION }}{{ .BRANCH }} '
-      - git push
+      - helm push {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
+      - rm -rf {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz
+      - task: git-push
     vars:
       PACKAGE:
         sh: "ls *tgz* -Art | tail -n 1"
@@ -122,9 +132,27 @@ tasks:
     desc: Update Chart.yaml and package archive
     cmds:
       - git add ./helm/*/*
-      - yq e -i '.version = "{{ .UPDATED_TAG_VERSION }}"' ./helm/*/Chart.yaml
-      - "sed -i 's/appVersion: .*/appVersion: {{ .UPDATED_TAG_VERSION }} /g' ./helm/*/Chart.yaml"
+      - yq e -i '.version = "{{ .TAG_VERSION }}"' ./helm/*/Chart.yaml
+      - "sed -i 's/appVersion: .*/appVersion: {{ .TAG_VERSION }} /g' ./helm/*/Chart.yaml"
       - yq e -i '.deployment.containers.manager.image = "{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}"' ./helm/*/values.yaml
-      - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .UPDATED_TAG_VERSION }}{{ .BRANCH }}"' ./helm/*/values.yaml
-      - yq e -i '.releases[0].version = "{{ .UPDATED_TAG_VERSION }}"' ./helmfile.yaml
+      - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .TAG_VERSION }}"' ./helm/*/values.yaml
+      - yq e -i '.releases[0].version = "{{ .TAG_VERSION }}"' ./helmfile.yaml
       - helm package ./helm/*/
+
+  git-push:
+    desc: Commit & push the module
+    cmds:
+      - go mod tidy
+      - git pull
+      - git config advice.addIgnoredFile false
+      - git add *
+      - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .TAG_VERSION }}{{ .BRANCH }}'
+      - git push origin {{ .BRANCH }}
+
+  # INIT TASK
+  install-kustomize:
+    desc: Download and install-kustomize
+    cmds:
+      - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
+      - sudo mv kustomize /usr/bin/kustomize
+      - sudo chmod +x /usr/bin/kustomize

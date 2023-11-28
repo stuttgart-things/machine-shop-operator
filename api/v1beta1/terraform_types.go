@@ -28,13 +28,15 @@ type TerraformSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// +kubebuilder:default:="1.4.4"
-	TerraformVersion string   `json:"terraform-version,omitempty"`
-	Module           []string `json:"module"`
-	Template         string   `json:"template"`
-	Variables        []string `json:"variables"`
-	Backend          []string `json:"backend"`
-	Secrets          []string `json:"secrets"`
+	// +kubebuilder:default:="1.5.7"
+	TerraformVersion string `json:"terraform-version,omitempty"`
+	// +kubebuilder:default:="present"
+	State     string   `json:"state,omitempty"`
+	Module    []string `json:"module"`
+	Template  string   `json:"template"`
+	Variables []string `json:"variables"`
+	Backend   []string `json:"backend"`
+	Secrets   []string `json:"secrets"`
 }
 
 // TerraformStatus defines the observed state of Terraform

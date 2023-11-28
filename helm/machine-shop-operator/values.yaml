@@ -39,13 +39,15 @@ configmaps:
 
       terraform {
         backend "s3" {
-          endpoint = "{{`{{ .backendEndpoint }}`}}"
+          endpoints = { s3 = "{{`{{ .backendEndpoint }}`}}" }
+          skip_requesting_account_id = true
           key = "{{`{{ .backendKey }}`}}"
           region = "{{`{{ .backendRegion }}`}}"
           bucket = "{{`{{ .backendBucket }}`}}"
           skip_credentials_validation = true
           skip_metadata_api_check = true
           skip_region_validation = true
+          skip_s3_checksum = true
           force_path_style = true
         }
 
@@ -184,13 +186,14 @@ configmaps:
 
       terraform {
         backend "s3" {
-          endpoint = "{{`{{ .backendEndpoint }}`}}"
+          endpoints = { s3 = "{{`{{ .backendEndpoint }}`}}" }
           key = "{{`{{ .backendKey }}`}}"
           region = "{{`{{ .backendRegion }}`}}"
           bucket = "{{`{{ .backendBucket }}`}}"
           skip_credentials_validation = true
           skip_metadata_api_check = true
           skip_region_validation = true
+          skip_s3_checksum = true
           force_path_style = true
         }
 
@@ -323,7 +326,7 @@ deployment:
           mountPath: /terraform/
           volumeKind: emptyDir
       image: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator/machine-shop-operator
-      tag: 23.1124.1243-v0.1.62
+      tag: 23.1128.1356-0.1.13
       imagePullPolicy: Always
       env:
         ANSIBLE_GATHERING:

@@ -47,10 +47,13 @@ spec:
                 items:
                   type: string
                 type: array
+              state:
+                default: present
+                type: string
               template:
                 type: string
               terraform-version:
-                default: 1.4.4
+                default: 1.5.7
                 type: string
               variables:
                 items:

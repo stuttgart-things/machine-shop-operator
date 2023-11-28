@@ -80,20 +80,23 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// GET VARIABLES FROM CR
 	var (
 		tfVersion     string   = terraformCR.Spec.TerraformVersion
+		resourceState string   = terraformCR.Spec.State
 		template      string   = terraformCR.Spec.Template
 		module        []string = terraformCR.Spec.Module
 		backend       []string = terraformCR.Spec.Backend
 		secrets       []string = terraformCR.Spec.Secrets
 		variables     []string = terraformCR.Spec.Variables
-		tfInitOptions []tfexec.InitOption
-		applyOptions  []tfexec.ApplyOption
 	)
 
 	// WORKING DIRS
 	var (
 		logfilePath       = "/tmp/" + req.Name + ".log"
 		workingDir        = "/tmp/tf/" + req.Name + "/"
-		msTeamswebhookUrl = "https://365sva.webhook.office.com/webhookb2/2f14a9f8-4736-46dd-9c8c-31547ec37180@0a65cb1e-37d5-41ff-980a-647d9d0e4f0b/IncomingWebhook/a993544595464ce6af4f2f0461d55a17/dc3a27ed-396c-40b7-a9b2-f1a2b6b44efe"
+		msTeamswebhookUrl = os.Getenv("WEBHOOK_URL")
+		tfInitOptions     []tfexec.InitOption
+		applyOptions      []tfexec.ApplyOption
+		destroyOptions    []tfexec.DestroyOption
+		tfOperation       = "APPLY"
 	)
 
 	// GET MODULE PARAMETER
@@ -129,6 +132,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// PRINT OUT CR
 	fmt.Println("CR-NAME", req.Name)
+	fmt.Println("RESOURCE STATE", resourceState)
 
 	// READ + RENDER TF MODULE TEMPLATE
 	moduleCallTemplate := sthingsBase.ReadFileToVariable("terraform/" + template)
@@ -158,9 +162,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	log.Info("⚡️ INITALIZING OF TERRAFORM DONE ⚡️")
 
-	// TERRAFORM APPLY
-	log.Info("⚡️ APPLYING.. ⚡️")
-
 	for _, secret := range secrets {
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
@@ -175,17 +176,30 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	tf.SetStdout(fileWriter)
 	tf.SetStderr(fileWriter)
 
-	err = tf.Apply(context.Background(), applyOptions...)
+	// TF APPLY
+	if resourceState != "absent" {
+		// TERRAFORM APPLY
+		log.Info("⚡️ APPLYING.. ⚡️")
+		err = tf.Apply(context.Background(), applyOptions...)
+	} else {
+		// TF DESTORY
+		log.Info("⚡️ DESTROYING.. ⚡️")
+		tfOperation = "DESTROY"
+		for _, secret := range secrets {
+			destroyOptions = append(destroyOptions, tfexec.Var(strings.TrimSpace(secret)))
+		}
+		err = tf.Destroy(context.Background(), destroyOptions...)
+	}
 
 	if err != nil {
-		log.Error(err, "TF APPLY ABORTED!")
+		log.Error(err, "TERRAFORM "+tfOperation+" ABORTED!")
 	} else {
-		log.Info("TF APPLY DONE!")
+		log.Info("TERRAFORM " + tfOperation + " DONE!")
 	}
 
 	// EXTRACT LOGGING INFORMATION
 	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
-	// fmt.Println(logfileApplyOperation)
+	fmt.Println(logfileApplyOperation)
 
 	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `(.*(?:Apply complete).*)`)
 	log.Info("TERRAFORM-STATUS: " + applyStatus)
@@ -194,7 +208,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
 		s := strings.Split(logfileApplyOperation, "Outputs:")
-		fmt.Println("outputInformation:")
+		fmt.Println("OUTPUTINFORMATION:")
 		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
 		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
 		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
@@ -202,12 +216,13 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
 	}
 
-	webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
-
-	sthingsCli.SendWebhookToTeams(webhook)
-	log.Info("WEBHOOK SENDED")
-
-	fmt.Println("FOO:", os.Getenv("WEBHOOK_URL"))
+	if msTeamswebhookUrl != "" {
+		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
+		sthingsCli.SendWebhookToTeams(webhook)
+		log.Info("WEBHOOK SENDED")
+	} else {
+		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED")
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -228,12 +243,12 @@ func initalizeTerraform(terraformDir, terraformVersion string) (tf *tfexec.Terra
 
 	execPath, err := installer.Install(context.Background())
 	if err != nil {
-		fmt.Println("Error installing Terraform: %s", err)
+		fmt.Println("ERROR INSTALLING TERRAFORM: %s", err)
 	}
 
 	tf, err = tfexec.NewTerraform(terraformDir, execPath)
 	if err != nil {
-		fmt.Println("Error running Terraform: %s", err)
+		fmt.Println("ERROR RUNNING TERRAFORM: %s", err)
 	}
 
 	return
