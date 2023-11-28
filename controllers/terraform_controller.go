@@ -162,9 +162,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	log.Info("⚡️ INITALIZING OF TERRAFORM DONE ⚡️")
 
-	// TERRAFORM APPLY
-	log.Info("⚡️ APPLYING.. ⚡️")
-
 	for _, secret := range secrets {
 		applyOptions = append(applyOptions, tfexec.Var(strings.TrimSpace(secret)))
 	}
@@ -181,9 +178,12 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// TF APPLY
 	if resourceState != "absent" {
+		// TERRAFORM APPLY
+		log.Info("⚡️ APPLYING.. ⚡️")
 		err = tf.Apply(context.Background(), applyOptions...)
 	} else {
-		// TFDESTORY
+		// TF DESTORY
+		log.Info("⚡️ DESTROYING.. ⚡️")
 		tfOperation = "DESTROY"
 		for _, secret := range secrets {
 			destroyOptions = append(destroyOptions, tfexec.Var(strings.TrimSpace(secret)))
@@ -199,7 +199,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// EXTRACT LOGGING INFORMATION
 	logfileApplyOperation := sthingsBase.ReadFileToVariable(logfilePath)
-	// fmt.Println(logfileApplyOperation)
+	fmt.Println(logfileApplyOperation)
 
 	applyStatus, _ := sthingsBase.GetRegexSubMatch(logfileApplyOperation, `(.*(?:Apply complete).*)`)
 	log.Info("TERRAFORM-STATUS: " + applyStatus)
