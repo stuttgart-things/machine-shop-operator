@@ -6,10 +6,13 @@ manage the lifecycle of terraform resources w/ custom resources on k8s
 
 ```bash
 task --list: Available tasks for this project:
+* branch:                  Create branch from main
 * build-image:             Build image
 * crds:                    Generate crds
+* delete-branch:           Delete branch from origin
 * deploy:                  Build image & deploy
 * deploy-crds:             Generate and deploy crds
+* git-push:                Commit & push the module
 * install-kustomize:       Download and install-kustomize
 * lint:                    Lint code
 * package:                 Update Chart.yaml and package archive
