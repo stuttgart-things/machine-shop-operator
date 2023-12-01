@@ -29,6 +29,8 @@ import (
 	sthingsBase "github.com/stuttgart-things/sthingsBase"
 	sthingsCli "github.com/stuttgart-things/sthingsCli"
 	"k8s.io/apimachinery/pkg/api/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -215,6 +217,16 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		outputInformation = outputInformationWithoutQuotes
 		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
 	}
+
+	readyCondition := metav1.Condition{
+		Status: metav1.ConditionFalse,
+		// Reason:             terraformCR.ReconciliationFailedReason,
+		Message: err.Error(),
+		// Type:               terraformCR.ConditionTypeReady,
+		ObservedGeneration: terraformCR.GetGeneration(),
+	}
+
+	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, readyCondition)
 
 	if msTeamswebhookUrl != "" {
 		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
