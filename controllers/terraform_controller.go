@@ -215,7 +215,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
 		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
 		outputInformation = outputInformationWithoutQuotes
-		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
+		// log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
 	}
 
 	readyCondition := metav1.Condition{

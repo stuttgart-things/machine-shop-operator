@@ -17,7 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,10 +41,8 @@ type TerraformSpec struct {
 
 // TerraformStatus defines the observed state of Terraform
 type TerraformStatus struct {
-	ConfigMapRef         corev1.ObjectReference `json:"configMapRef,omitempty"`
-	Conditions           []metav1.Condition     `json:"conditions,omitempty"`
-	ConfigMapReady       bool                   `json:"configMapReady,omitempty"`
-	VirtualMachinesReady bool                   `json:"virtualMachinesReady,omitempty"`
+	Conditions           []metav1.Condition `json:"conditions,omitempty"`
+	VirtualMachinesReady bool               `json:"virtualMachinesReady,omitempty"`
 }
 
 //+kubebuilder:object:root=true
