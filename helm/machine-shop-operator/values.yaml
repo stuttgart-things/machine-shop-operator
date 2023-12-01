@@ -518,18 +518,6 @@ clusterRoles:
       app.kubernetes.io/part-of: machine-shop-operator
     rules:
       - apiGroups:
-          - machineshop.sthings.tiab.ssc.sva.de
-        resources:
-          - ansibles
-        verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-      - apiGroups:
           - "batch"
         resources:
           - jobs
@@ -539,20 +527,6 @@ clusterRoles:
           - patch
           - watch
           - create
-      - apiGroups:
-          - machineshop.sthings.tiab.ssc.sva.de
-        resources:
-          - ansibles/finalizers
-        verbs:
-          - update
-      - apiGroups:
-          - machineshop.sthings.tiab.ssc.sva.de
-        resources:
-          - ansibles/status
-        verbs:
-          - get
-          - patch
-          - update
       - apiGroups:
           - machineshop.sthings.tiab.ssc.sva.de
         resources:

@@ -137,8 +137,6 @@ spec:
                   - type
                   type: object
                 type: array
-              virtualMachinesReady:
-                type: boolean
             type: object
         type: object
     served: true

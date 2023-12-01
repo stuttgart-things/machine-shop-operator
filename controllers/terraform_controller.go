@@ -40,6 +40,13 @@ import (
 	machineshopv1beta1 "github.com/stuttgart-things/machine-shop-operator/api/v1beta1"
 )
 
+const (
+	// typeAvailableTerraform represents the status of the Deployment reconciliation
+	typeAvailableTerraform = "Available"
+	// typeDegradedTerraform represents the status used when the custom resource is deleted and the finalizer operations are must to occur.
+	typeDegradedTerraform = "Degraded"
+)
+
 // TerraformReconciler reconciles a Terraform object
 type TerraformReconciler struct {
 	client.Client
@@ -76,6 +83,24 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			log.Info("Terraform resource not found...")
 		} else {
 			log.Info("Error", err)
+		}
+	}
+
+	if terraformCR.Status.Conditions == nil || len(terraformCR.Status.Conditions) == 0 {
+		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform, Status: metav1.ConditionUnknown, Reason: "Reconciling", Message: "Starting reconciliation"})
+		if err = r.Status().Update(ctx, terraformCR); err != nil {
+			log.Error(err, "Failed to update terraformCR status")
+			return ctrl.Result{}, err
+		}
+
+		// Let's re-fetch the terraformCR Custom Resource after update the status
+		// so that we have the latest state of the resource on the cluster and we will avoid
+		// raise the issue "the object has been modified, please apply
+		// your changes to the latest version and try again" which would re-trigger the reconciliation
+		// if we try to update it again in the following operations
+		if err := r.Get(ctx, req.NamespacedName, terraformCR); err != nil {
+			log.Error(err, "Failed to re-fetch terraformCR")
+			return ctrl.Result{}, err
 		}
 	}
 
@@ -208,15 +233,15 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	var outputInformation string
 
-	// if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
-	// 	s := strings.Split(logfileApplyOperation, "Outputs:")
-	// 	fmt.Println("OUTPUTINFORMATION:")
-	// 	outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
-	// 	outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
-	// 	outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
-	// 	outputInformation = outputInformationWithoutQuotes
-	// 	// log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
-	// }
+	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
+		s := strings.Split(logfileApplyOperation, "Outputs:")
+		fmt.Println("OUTPUTINFORMATION:")
+		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
+		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
+		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
+		outputInformation = outputInformationWithoutQuotes
+		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
+	}
 
 	readyCondition := metav1.Condition{
 		Status: metav1.ConditionFalse,

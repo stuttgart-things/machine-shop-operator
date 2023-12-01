@@ -41,8 +41,7 @@ type TerraformSpec struct {
 
 // TerraformStatus defines the observed state of Terraform
 type TerraformStatus struct {
-	Conditions           []metav1.Condition `json:"conditions,omitempty"`
-	VirtualMachinesReady bool               `json:"virtualMachinesReady,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
 }
 
 //+kubebuilder:object:root=true
