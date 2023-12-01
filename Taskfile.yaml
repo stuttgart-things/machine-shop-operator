@@ -162,4 +162,4 @@ tasks:
     desc: Create pull request into main
     cmds:
       - task: git-push
-      - gh pr create -t "pr" -b "created pr for ${BRANCH_NAME} branch into main"
+      - gh pr create -t "merge from {{ .BRANCH }} into main" -b "created pr for {{ .BRANCH }} branch into main"
