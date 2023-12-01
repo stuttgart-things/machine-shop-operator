@@ -38,6 +38,7 @@ tasks:
         git checkout -b ${BRANCH_NAME}
         git push origin ${BRANCH_NAME}
       - git branch
+      - git branch --set-upstream-to=origin/main ADD-STATUS-FIELD
 
   delete-branch:
     desc: Delete branch from origin

@@ -11,6 +11,9 @@ environments:
   labul-vsphere:
     values:
       - env/{{ .Environment.Name }}.yaml
+  vcluster:
+    values:
+      - env/{{ .Environment.Name }}.yaml
 repositories:
   - name: machine-shop-operator
     url: scr.cd43.sthings-pve.labul.sva.de/machine-shop-operator
