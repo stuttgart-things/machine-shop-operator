@@ -243,22 +243,23 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
 	}
 
-	readyCondition := metav1.Condition{
-		Status: metav1.ConditionFalse,
-		// Reason:             terraformCR.ReconciliationFailedReason,
-		Message: err.Error(),
-		// Type:               terraformCR.ConditionTypeReady,
-		ObservedGeneration: terraformCR.GetGeneration(),
-	}
-
-	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, readyCondition)
-
 	if msTeamswebhookUrl != "" {
 		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
 		sthingsCli.SendWebhookToTeams(webhook)
 		log.Info("WEBHOOK SENDED")
 	} else {
 		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED")
+	}
+
+	// The following implementation will update the status
+	// size := terraformCR.Spec.Size
+	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
+		Status: metav1.ConditionTrue, Reason: "Reconciling",
+		Message: fmt.Sprintf("VM was build " + terraformCR.Name)})
+
+	if err := r.Status().Update(ctx, terraformCR); err != nil {
+		log.Error(err, "Failed to update terraformCR status")
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
