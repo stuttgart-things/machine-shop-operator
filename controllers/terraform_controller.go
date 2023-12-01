@@ -29,6 +29,8 @@ import (
 	sthingsBase "github.com/stuttgart-things/sthingsBase"
 	sthingsCli "github.com/stuttgart-things/sthingsCli"
 	"k8s.io/apimachinery/pkg/api/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,6 +38,13 @@ import (
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	machineshopv1beta1 "github.com/stuttgart-things/machine-shop-operator/api/v1beta1"
+)
+
+const (
+	// typeAvailableTerraform represents the status of the Deployment reconciliation
+	typeAvailableTerraform = "Available"
+	// typeDegradedTerraform represents the status used when the custom resource is deleted and the finalizer operations are must to occur.
+	typeDegradedTerraform = "Degraded"
 )
 
 // TerraformReconciler reconciles a Terraform object
@@ -74,6 +83,24 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			log.Info("Terraform resource not found...")
 		} else {
 			log.Info("Error", err)
+		}
+	}
+
+	if terraformCR.Status.Conditions == nil || len(terraformCR.Status.Conditions) == 0 {
+		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform, Status: metav1.ConditionUnknown, Reason: "Reconciling", Message: "Starting reconciliation"})
+		if err = r.Status().Update(ctx, terraformCR); err != nil {
+			log.Error(err, "Failed to update terraformCR status")
+			return ctrl.Result{}, err
+		}
+
+		// Let's re-fetch the terraformCR Custom Resource after update the status
+		// so that we have the latest state of the resource on the cluster and we will avoid
+		// raise the issue "the object has been modified, please apply
+		// your changes to the latest version and try again" which would re-trigger the reconciliation
+		// if we try to update it again in the following operations
+		if err := r.Get(ctx, req.NamespacedName, terraformCR); err != nil {
+			log.Error(err, "Failed to re-fetch terraformCR")
+			return ctrl.Result{}, err
 		}
 	}
 
@@ -222,6 +249,16 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Info("WEBHOOK SENDED")
 	} else {
 		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED")
+	}
+
+	// The following implementation will update the status
+	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
+		Status: metav1.ConditionTrue, Reason: "Reconciling",
+		Message: fmt.Sprintf(tfOperation + " operation was successful for " + terraformCR.Name)})
+
+	if err := r.Status().Update(ctx, terraformCR); err != nil {
+		log.Error(err, "Failed to update terraformCR status")
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

@@ -3,12 +3,15 @@ releases:
   - name: machine-shop-operator
     namespace: machine-shop-operator-system
     chart: machine-shop-operator/machine-shop-operator
-    version: 0.1.14
+    version: 0.1.21
     installed: true
     values:
       - "env/values.yaml.gotmpl"
 environments:
   labul-vsphere:
+    values:
+      - env/{{ .Environment.Name }}.yaml
+  vcluster:
     values:
       - env/{{ .Environment.Name }}.yaml
 repositories:

@@ -38,6 +38,7 @@ tasks:
         git checkout -b ${BRANCH_NAME}
         git push origin ${BRANCH_NAME}
       - git branch
+      - git branch --set-upstream-to=origin/main ADD-STATUS-FIELD
 
   delete-branch:
     desc: Delete branch from origin
@@ -156,3 +157,9 @@ tasks:
       - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
       - sudo mv kustomize /usr/bin/kustomize
       - sudo chmod +x /usr/bin/kustomize
+
+  merge:
+    desc: Create pull request into main
+    cmds:
+      - task: git-push
+      - gh pr create -t "merge from {{ .BRANCH }} into main" -b "created pr for {{ .BRANCH }} branch into main"
