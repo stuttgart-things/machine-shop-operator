@@ -15,6 +15,7 @@ task --list: Available tasks for this project:
 * git-push:                Commit & push the module
 * install-kustomize:       Download and install-kustomize
 * lint:                    Lint code
+* merge:                   Create pull request into main
 * package:                 Update Chart.yaml and package archive
 * push:                    Push to registry
 * tag:                     commit, push & tag the module
@@ -71,48 +72,52 @@ oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version v0.1.121 \
 <details><summary>EXAMPLE-VSPHERE-VM</summary>
 
 ```yaml
+---
 apiVersion: machineshop.sthings.tiab.ssc.sva.de/v1beta1
 kind: Terraform
 metadata:
-  name: yacht-vm1
-  labels:
-    app.kubernetes.io/name: terraform
-    app.kubernetes.io/part-of: machine-shop-operator
-    app.kubernetes.io/created-by: machine-shop-operator
+ name: sthings7
+ namespace: terraform
+ labels:
+   app.kubernetes.io/created-by: machine-shop-operator
+   app.kubernetes.io/name: terraform
+   app.kubernetes.io/part-of: machine-shop-operator
 spec:
-  variables:
-    - vsphere_vm_name="yacht1"
-    - vm_count=1
-    - vm_num_cpus=6
-    - vm_memory=8192
-    - vsphere_vm_template="/LabUL/host/Cluster01/10.31.101.40/ubuntu22"
-    - vsphere_vm_folder_path="phermann/rancher-things"
-    - vsphere_network="/LabUL/host/Cluster01/10.31.101.41/MGMT-10.31.101"
-    - vsphere_datastore="/LabUL/host/Cluster01/10.31.101.41/UL-ESX-SAS-01"
-    - vsphere_resource_pool="/LabUL/host/Cluster01/Resources"
-    - vsphere_datacenter="LabUL"
-  module:
-    - moduleName=yacht1
-    - backendKey=yacht1.tfstate
-    - moduleSourceUrl=https://artifacts.tiab.labda.sva.de/modules/vsphere-vm.zip
-    - backendEndpoint=https://artifacts.tiab.labda.sva.de
-    - backendRegion=main
-    - backendBucket=vsphere-vm
-    - tfProviderName=vsphere
-    - tfProviderSource=hashicorp/vsphere
-    - tfProviderVersion=2.3.1
-    - tfVersion=1.4.4
-  backend:
-    - access_key=apps/data/artifacts:rootUser
-    - secret_key=apps/data/artifacts:rootPassword
-  secrets:
-    - vsphere_user=cloud/data/vsphere:username
-    - vsphere_password=cloud/data/vsphere:password
-    - vsphere_server=cloud/data/vsphere:ip
-    - vm_ssh_user=cloud/data/vsphere:vm_ssh_user
-    - vm_ssh_password=cloud/data/vsphere:vm_ssh_password
-  terraform-version: 1.4.4
-  template: vsphere-vm
+ state: present
+ variables:
+  - vsphere_vm_name="sthings7"
+  - vm_count=1
+  - vm_num_cpus=8
+  - vm_memory=4096
+  - vm_disk_size=96
+  - vsphere_vm_template="/LabUL/host/Cluster01/10.31.101.40/ubuntu22"
+  - vsphere_vm_folder_path="stuttgart-things/testing"
+  - vsphere_network="/LabUL/host/Cluster01/10.31.101.41/LAB-10.31.103"
+  - vsphere_datastore="/LabUL/host/Cluster01/10.31.101.41/UL-ESX-SAS-01"
+  - vsphere_resource_pool="/LabUL/host/Cluster01/Resources"
+  - vsphere_datacenter="LabUL"
+ backend:
+  - access_key=apps/data/artifacts:accessKey
+  - secret_key=apps/data/artifacts:secretKey
+ module:
+  - moduleName=sthings7
+  - backendKey=sthings7.tfstate
+  - moduleSourceUrl=https://artifacts.tiab.labda.sva.de/modules/vsphere-vm.zip
+  - backendEndpoint=https://artifacts.app.4sthings.tiab.ssc.sva.de
+  - backendRegion=main
+  - backendBucket=vsphere-vm
+  - tfProviderName=vsphere
+  - tfProviderSource=hashicorp/vsphere
+  - tfProviderVersion=2.5.1
+  - tfVersion=1.6.5
+ secrets:
+  - vsphere_user=cloud/data/vsphere:username
+  - vsphere_password=cloud/data/vsphere:password
+  - vsphere_server=cloud/data/vsphere:ip
+  - vm_ssh_user=cloud/data/vsphere:vm_ssh_user
+  - vm_ssh_password=cloud/data/vsphere:vm_ssh_password
+ template: vsphere-vm
+ terraform-version: 1.6.5
 ```
 
 </details>
@@ -150,7 +155,7 @@ spec:
     - tfProviderName=proxmox
     - tfProviderSource=Telmate/proxmox
     - tfProviderVersion=2.9.14
-    - tfVersion=1.4.4
+    - tfVersion=1.6.5
   backend:
     - access_key=apps/data/artifacts:rootUser
     - secret_key=apps/data/artifacts:rootPassword
@@ -160,7 +165,7 @@ spec:
     - pve_api_password=cloud/data/pve:api_password
     - vm_ssh_user=cloud/data/pve:ssh_user
     - vm_ssh_password=cloud/data/pve:ssh_password
-  terraform-version: 1.4.5
+  terraform-version: 1.6.5
   template: pve-vm
 ```
 
