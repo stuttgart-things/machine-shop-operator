@@ -157,3 +157,9 @@ tasks:
       - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
       - sudo mv kustomize /usr/bin/kustomize
       - sudo chmod +x /usr/bin/kustomize
+
+  merge:
+    desc: Create pull request into main
+    cmds:
+      - task: git-push
+      - gh pr create -t "pr" -b "created pr for ${BRANCH_NAME} branch into main"

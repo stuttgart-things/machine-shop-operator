@@ -254,7 +254,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// The following implementation will update the status
 	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
 		Status: metav1.ConditionTrue, Reason: "Reconciling",
-		Message: fmt.Sprintf(tfOperation + " was successful for " + terraformCR.Name)})
+		Message: fmt.Sprintf(tfOperation + " operation was successful for " + terraformCR.Name)})
 
 	if err := r.Status().Update(ctx, terraformCR); err != nil {
 		log.Error(err, "Failed to update terraformCR status")
