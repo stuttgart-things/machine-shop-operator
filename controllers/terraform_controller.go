@@ -208,15 +208,15 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	var outputInformation string
 
-	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
-		s := strings.Split(logfileApplyOperation, "Outputs:")
-		fmt.Println("OUTPUTINFORMATION:")
-		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
-		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
-		outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
-		outputInformation = outputInformationWithoutQuotes
-		// log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
-	}
+	// if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
+	// 	s := strings.Split(logfileApplyOperation, "Outputs:")
+	// 	fmt.Println("OUTPUTINFORMATION:")
+	// 	outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
+	// 	outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
+	// 	outputInformationWithoutQuotes := strings.Replace(outputInformationWithoutComma, "\"", "", -1)
+	// 	outputInformation = outputInformationWithoutQuotes
+	// 	// log.Info("TERRAFORM-OUTPUTS: " + outputInformation)
+	// }
 
 	readyCondition := metav1.Condition{
 		Status: metav1.ConditionFalse,

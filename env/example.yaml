@@ -9,7 +9,7 @@ metadata:
    app.kubernetes.io/name: terraform
    app.kubernetes.io/part-of: machine-shop-operator
 spec:
- state: absent
+ state: present
  variables:
   - vsphere_vm_name="sthings7"
   - vm_count=1
