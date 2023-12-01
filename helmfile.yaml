@@ -3,7 +3,7 @@ releases:
   - name: machine-shop-operator
     namespace: machine-shop-operator-system
     chart: machine-shop-operator/machine-shop-operator
-    version: 0.1.14
+    version: 0.1.16
     installed: true
     values:
       - "env/values.yaml.gotmpl"
