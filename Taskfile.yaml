@@ -170,3 +170,4 @@ tasks:
       - gh pr create -t "merge from {{ .BRANCH }} into main" -b "created pr for {{ .BRANCH }} branch into main"
       - git switch main
       - gh pr merge $(gh pr list | grep "^[^#;]" | awk '{print $1}') --auto --rebase --delete-branch
+      - git pull && git pull --tags
