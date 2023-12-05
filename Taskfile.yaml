@@ -38,6 +38,8 @@ tasks:
         git checkout -b ${BRANCH_NAME}
         git push origin ${BRANCH_NAME}
       - git branch
+      # GET LATEST TAGED VERSION FROM MAIN
+      # ADD BRANCH NAME
       # ADD TAGING HERE
       - git branch --set-upstream-to=origin/main ${BRANCH_NAME}
 
