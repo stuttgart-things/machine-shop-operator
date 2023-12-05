@@ -166,6 +166,11 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	log.Info("⚡️ Rendering tf config ⚡️")
 	renderedModuleCall, _ := sthingsBase.RenderTemplateInline(string(moduleCallTemplate), "missingkey=zero", "{{", "}}", moduleParameter)
 
+	// SET STATUS
+	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
+		Status: metav1.ConditionUnknown, Reason: "Reconciling",
+		Message: fmt.Sprintf(tfOperation + " operation was started for " + terraformCR.Name)})
+
 	// CREATE TF FILES
 	log.Info("⚡️ CREATING WORKING DIR AND PROJECT FILES ⚡️")
 	sthingsBase.CreateNestedDirectoryStructure(workingDir, 0777)
