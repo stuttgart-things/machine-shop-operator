@@ -166,4 +166,6 @@ tasks:
     cmds:
       - task: git-push
       - gh pr create -t "merge from {{ .BRANCH }} into main" -b "created pr for {{ .BRANCH }} branch into main"
+      - git switch main
+      - gh pr merge 10 --auto --rebase --delete-branch
       # gh pr merge --auto --rebase
