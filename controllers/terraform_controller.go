@@ -220,8 +220,19 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if err != nil {
 		log.Error(err, "TERRAFORM "+tfOperation+" ABORTED!")
+
+		// THE FOLLOWING IMPLEMENTATION WILL UPDATE THE STATUS
+		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
+			Status: metav1.ConditionFalse, Reason: "Reconciling",
+			Message: fmt.Sprintf(tfOperation + " operation failed for " + terraformCR.Name)})
+
 	} else {
 		log.Info("TERRAFORM " + tfOperation + " DONE!")
+
+		// THE FOLLOWING IMPLEMENTATION WILL UPDATE THE STATUS
+		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
+			Status: metav1.ConditionTrue, Reason: "Reconciling",
+			Message: fmt.Sprintf(tfOperation + " operation was successful for " + terraformCR.Name)})
 	}
 
 	// EXTRACT LOGGING INFORMATION
@@ -250,11 +261,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	} else {
 		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED")
 	}
-
-	// The following implementation will update the status
-	apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
-		Status: metav1.ConditionTrue, Reason: "Reconciling",
-		Message: fmt.Sprintf(tfOperation + " operation was successful for " + terraformCR.Name)})
 
 	if err := r.Status().Update(ctx, terraformCR); err != nil {
 		log.Error(err, "Failed to update terraformCR status")
