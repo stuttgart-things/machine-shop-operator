@@ -221,7 +221,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err != nil {
 		log.Error(err, "TERRAFORM "+tfOperation+" ABORTED!")
 
-		// THE FOLLOWING IMPLEMENTATION WILL UPDATE THE STATUS
+		// UPDATE FAILED STATUS
 		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
 			Status: metav1.ConditionFalse, Reason: "Reconciling",
 			Message: fmt.Sprintf(tfOperation + " operation failed for " + terraformCR.Name)})
@@ -229,7 +229,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	} else {
 		log.Info("TERRAFORM " + tfOperation + " DONE!")
 
-		// THE FOLLOWING IMPLEMENTATION WILL UPDATE THE STATUS
+		// UPDATE SUCCESSFUL STATUS
 		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
 			Status: metav1.ConditionTrue, Reason: "Reconciling",
 			Message: fmt.Sprintf(tfOperation + " operation was successful for " + terraformCR.Name)})
