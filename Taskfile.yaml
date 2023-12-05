@@ -38,10 +38,12 @@ tasks:
         git checkout -b ${BRANCH_NAME}
         git push origin ${BRANCH_NAME}
       - git branch
-      # GET LATEST TAGED VERSION FROM MAIN
-      # ADD BRANCH NAME
-      # ADD TAGING HERE
       - git branch --set-upstream-to=origin/main ${BRANCH_NAME}
+      - |
+        echo "Enter to be created tag: ({{ .TAG_VERSION }}-${BRANCH_NAME})"
+        read BRANCH_TAG;
+        git tag -a ${BRANCH_TAG} -m 'updated for stuttgart-things {{ .DATE }} for tag version ${BRANCH_TAG}'
+        git push --tags
 
   delete-branch:
     desc: Delete branch from origin
