@@ -166,8 +166,8 @@ tasks:
   merge:
     desc: Create pull request into main
     cmds:
-      # - task: git-push
-      # - gh pr create -t "merge from {{ .BRANCH }} into main" -b "created pr for {{ .BRANCH }} branch into main"
-      # - git switch main
-      - gh pr merge $(gh pr list | grep "^[^#;]" | awk '{print $1}') --auto --rebase --delete-branch
-      - git branch -D {{ .BRANCH }}
+      - task: git-push
+      - gh pr create -t "merge from {{ .BRANCH }} into main" -b "created pr for {{ .BRANCH }} branch into main"
+      - git switch main
+      - gh pr merge 10 --auto --rebase --delete-branch
+      # gh pr merge --auto --rebase
