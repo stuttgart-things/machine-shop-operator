@@ -80,16 +80,16 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("Terraform resource not found...")
+			log.Info("TERRAFORM RESOURCE NOT FOUND...")
 		} else {
-			log.Info("Error", err)
+			log.Info("ERROR", err)
 		}
 	}
 
 	if terraformCR.Status.Conditions == nil || len(terraformCR.Status.Conditions) == 0 {
 		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform, Status: metav1.ConditionUnknown, Reason: "Reconciling", Message: "Starting reconciliation"})
 		if err = r.Status().Update(ctx, terraformCR); err != nil {
-			log.Error(err, "Failed to update terraformCR status")
+			log.Error(err, "FAILED TO UPDATE TERRAFORMCR STATUS")
 			return ctrl.Result{}, err
 		}
 
@@ -99,7 +99,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// your changes to the latest version and try again" which would re-trigger the reconciliation
 		// if we try to update it again in the following operations
 		if err := r.Get(ctx, req.NamespacedName, terraformCR); err != nil {
-			log.Error(err, "Failed to re-fetch terraformCR")
+			log.Error(err, "FAILED TO RE-FETCH TERRAFORMCR")
 			return ctrl.Result{}, err
 		}
 	}
@@ -213,6 +213,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// TERRAFORM APPLY
 		log.Info("⚡️ APPLYING.. ⚡️")
 		err = tf.Apply(context.Background(), applyOptions...)
+
 	} else {
 		// TF DESTORY
 		log.Info("⚡️ DESTROYING.. ⚡️")
@@ -228,16 +229,16 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 		// UPDATE FAILED STATUS
 		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
-			Status: metav1.ConditionFalse, Reason: "Reconciling",
-			Message: fmt.Sprintf(tfOperation + " operation failed for " + terraformCR.Name)})
+			Status: metav1.ConditionFalse, Reason: "RECONCILING",
+			Message: fmt.Sprintf(tfOperation + " OPERATION FAILED FOR " + terraformCR.Name)})
 
 	} else {
 		log.Info("TERRAFORM " + tfOperation + " DONE!")
 
 		// UPDATE SUCCESSFUL STATUS
 		apimeta.SetStatusCondition(&terraformCR.Status.Conditions, metav1.Condition{Type: typeAvailableTerraform,
-			Status: metav1.ConditionTrue, Reason: "Reconciling",
-			Message: fmt.Sprintf(tfOperation + " operation was successful for " + terraformCR.Name)})
+			Status: metav1.ConditionTrue, Reason: "RECONCILING",
+			Message: fmt.Sprintf(tfOperation + " OPERATION WAS SUCCESSFUL FOR " + terraformCR.Name)})
 	}
 
 	// EXTRACT LOGGING INFORMATION
@@ -249,8 +250,8 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	var outputInformation string
 
-	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `Outputs:`)) > 0 {
-		s := strings.Split(logfileApplyOperation, "Outputs:")
+	if len(sthingsBase.GetAllRegexMatches(logfileApplyOperation, `OUTPUTS:`)) > 0 {
+		s := strings.Split(logfileApplyOperation, "OUTPUTS:")
 		fmt.Println("OUTPUTINFORMATION:")
 		outputInformation, _ = sthingsBase.GetRegexSubMatch(s[1], `\[([^\[\]]*)\]`)
 		outputInformationWithoutComma := strings.Replace(outputInformation, ",", "", -1)
@@ -260,17 +261,21 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if msTeamswebhookUrl != "" {
-		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " was created \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
+		webhook := sthingsCli.MsTeamsWebhook{Title: "stuttgart-things/machine-shop-operator", Text: req.Name + " WAS CREATED \n" + applyStatus + "\n\n" + outputInformation, Color: "#DF813D", Url: msTeamswebhookUrl}
 		sthingsCli.SendWebhookToTeams(webhook)
 		log.Info("WEBHOOK SENDED")
 	} else {
 		log.Info("NO WEBHOOK SENDED - NO WEBHOOK URL DEFINED")
 	}
 
-	if err := r.Status().Update(ctx, terraformCR); err != nil {
-		log.Error(err, "Failed to update terraformCR status")
+	if err := r.Get(ctx, req.NamespacedName, terraformCR); err != nil {
+		log.Error(err, "FAILED TO RE-FETCH TERRAFORMCR")
 		return ctrl.Result{}, err
 	}
+	// if err := r.Status().Update(ctx, terraformCR); err != nil {
+	// 	log.Error(err, "Failed to update terraformCR status")
+	// 	return ctrl.Result{}, err
+	// }
 
 	return ctrl.Result{}, nil
 }
