@@ -272,10 +272,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Error(err, "FAILED TO RE-FETCH TERRAFORMCR")
 		return ctrl.Result{}, err
 	}
-	// if err := r.Status().Update(ctx, terraformCR); err != nil {
-	// 	log.Error(err, "Failed to update terraformCR status")
-	// 	return ctrl.Result{}, err
-	// }
 
 	return ctrl.Result{}, nil
 }

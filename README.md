@@ -1,11 +1,11 @@
 # stuttgart-things/machine-shop-operator
 
-manage the lifecycle of terraform resources w/ custom resources on k8s
+manage the lifecycle of terraform resources w/ custom resources on kubernetes
 
 ## DEV-TASKS
 
 ```bash
-task --list: Available tasks for this project:
+task --list:
 * branch:                  Create branch from main
 * build-image:             Build image
 * crds:                    Generate crds
