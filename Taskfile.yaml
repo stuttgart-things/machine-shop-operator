@@ -181,4 +181,8 @@ tasks:
         read BRANCH_TAG;
         git tag -a ${BRANCH_TAG} -m 'updated for stuttgart-things {{ .DATE }} for tag version ${BRANCH_TAG}'
         git push --tags
+      - task: build-image
+      - task: package
+      - helm push {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
+      - rm -rf {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz
       - task: git-push
