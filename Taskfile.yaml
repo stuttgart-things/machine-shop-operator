@@ -185,3 +185,6 @@ tasks:
       - helm push {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
       - rm -rf {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz
       - task: git-push
+    vars:
+      REGISTRY: eu.gcr.io
+      REPOSITORY_NAME: stuttgart-things
