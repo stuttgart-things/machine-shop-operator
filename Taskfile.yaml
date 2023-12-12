@@ -180,7 +180,6 @@ tasks:
         echo "Enter to be created tag: ({{ .TAG_VERSION }})"
         read BRANCH_TAG;
         git tag -a ${BRANCH_TAG} -m 'updated for stuttgart-things {{ .DATE }} for tag version ${BRANCH_TAG}'
-        git push --tags
       - task: build-image
       - task: package
       - helm push {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
