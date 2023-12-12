@@ -20,6 +20,7 @@ task --list:
 * push:                    Push to registry
 * tag:                     commit, push & tag the module
 * test:                    Test code
+* release:                 Create a release
 ```
 
 ## DEPLOYMENT
