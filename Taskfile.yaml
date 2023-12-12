@@ -171,3 +171,14 @@ tasks:
       - git switch main
       - gh pr merge $(gh pr list | grep "^[^#;]" | awk '{print $1}') --auto --rebase --delete-branch
       - git pull && git pull --tags
+
+  release:
+    desc: Create a release
+    cmds:
+      - git pull && git pull --tags
+      - |
+        echo "Enter to be created tag: ({{ .TAG_VERSION }})"
+        read BRANCH_TAG;
+        git tag -a ${BRANCH_TAG} -m 'updated for stuttgart-things {{ .DATE }} for tag version ${BRANCH_TAG}'
+        git push --tags
+      - task: git-push
