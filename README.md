@@ -61,7 +61,7 @@ secrets:
 EOF
 
 helm upgrade --install machine-shop-operator \
-oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version v0.1.121 \
+oci://eu.gcr.io/stuttgart-things/machine-shop-operator --version 0.1.48 \
 -n machine-shop-operator-system --values ./values.yaml --create-namespace
 ```
 
