@@ -1,15 +1,14 @@
 ---
 version: 3
 vars:
-  # REGISTRY: eu.gcr.io
-  # REPOSITORY_NAME: stuttgart-things
-  REGISTRY: scr.cd43.sthings-pve.labul.sva.de
-  REPOSITORY_NAME: machine-shop-operator
+  REGISTRY: eu.gcr.io
+  REPOSITORY_NAME: stuttgart-things
+  #REGISTRY: scr.cd43.sthings-pve.labul.sva.de
+  #REPOSITORY_NAME: machine-shop-operator
   MODULE: github.com/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}
   CONTAINER_RUNTIME_CMD: sudo nerdctl
   CONTROLLER_GEN_CMD: "./bin/controller-gen"
   KUSTOMIZE_CMD: /usr/bin/kustomize
-
   PROJECT_NAME:
     sh: pwd | grep -o "[^/]*$"
   VERSION:
@@ -24,7 +23,6 @@ vars:
     sh: if [ $(git rev-parse --abbrev-ref HEAD) != "main" ]; then echo $(git rev-parse --abbrev-ref HEAD) ; fi
   TAG_VERSION:
     sh: "echo {{ .UPDATED_TAG_VERSION }} | sed 's/[^0-9^.]*//g'"
-
 tasks:
   branch:
     desc: Create branch from main
@@ -44,7 +42,6 @@ tasks:
         read BRANCH_TAG;
         git tag -a ${BRANCH_TAG} -m 'updated for stuttgart-things {{ .DATE }} for tag version ${BRANCH_TAG}'
         git push --tags
-
   delete-branch:
     desc: Delete branch from origin
     cmds:
@@ -56,26 +53,22 @@ tasks:
         read BRANCH_NAME;
         git branch -d ${BRANCH_NAME}
         git push origin -d ${BRANCH_NAME}
-
   lint:
     desc: Lint code
     cmds:
       - cmd: golangci-lint run
         ignore_error: true
-
   test:
     desc: Test code
     cmds:
       - go mod tidy
       - go test -v
-
   crds:
     desc: Generate crds
     deps: [lint, test]
     cmds:
       - '{{ .CONTROLLER_GEN_CMD }} rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases'
       - '{{ .CONTROLLER_GEN_CMD }} rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=helm/{{ .PROJECT_NAME }}/crds'
-
   tag:
     desc: commit, push & tag the module
     deps: [lint]
@@ -86,7 +79,6 @@ tasks:
       - git pull --tags
       - git tag -a {{ .UPDATED_TAG_VERSION }} -m 'updated for stuttgart-things {{ .DATE }} for tag version {{ .UPDATED_TAG_VERSION }}'
       - git push origin --tags -f
-
   build-image:
     desc: Build image
     deps: [tag, crds]
@@ -94,7 +86,6 @@ tasks:
       - "{{ .CONTAINER_RUNTIME_CMD }} build -t {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .TAG_VERSION }} ."
       - "{{ .CONTAINER_RUNTIME_CMD }} push {{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .TAG_VERSION }}"
       - cd config/manager && {{ .KUSTOMIZE_CMD }} edit set image controller={{ .REGISTRY }}/{{ .REPOSITORY_NAME }}/{{ .PROJECT_NAME }}:{{ .DATE }}-{{ .TAG_VERSION }}
-
   deploy-crds:
     desc: Generate and deploy crds
     deps: [crds]
@@ -104,7 +95,6 @@ tasks:
       - sleep 5
       - kubectl apply -f /tmp/{{ .PROJECT_NAME }}-crds.yaml
       - kubectl get crds
-
   deploy:
     desc: Build image & deploy
     deps: [deploy-crds, build-image]
@@ -121,7 +111,6 @@ tasks:
       VAULT_TOKEN: ${VAULT_TOKEN}
       VAULT_NAMESPACE: ${VAULT_NAMESPACE}
       VAULT_ADDR: ${VAULT_ADDR}
-
   push:
     desc: Push to registry
     cmds:
@@ -133,7 +122,6 @@ tasks:
     vars:
       PACKAGE:
         sh: "ls *tgz* -Art | tail -n 1"
-
   package:
     desc: Update Chart.yaml and package archive
     cmds:
@@ -144,7 +132,6 @@ tasks:
       - yq e -i '.deployment.containers.manager.tag = "{{ .DATE }}-{{ .TAG_VERSION }}"' ./helm/*/values.yaml
       - yq e -i '.releases[0].version = "{{ .TAG_VERSION }}"' ./helmfile.yaml
       - helm package ./helm/*/
-
   git-push:
     desc: Commit & push the module
     cmds:
@@ -154,7 +141,6 @@ tasks:
       - git add *
       - git commit -am 'updated {{ .PROJECT_NAME }} {{ .DATE }} for tag version {{ .TAG_VERSION }}{{ .BRANCH }}'
       - git push origin {{ .BRANCH }}
-
   # INIT TASK
   install-kustomize:
     desc: Download and install-kustomize
@@ -162,7 +148,6 @@ tasks:
       - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash
       - sudo mv kustomize /usr/bin/kustomize
       - sudo chmod +x /usr/bin/kustomize
-
   merge:
     desc: Create pull request into main
     cmds:
@@ -171,7 +156,6 @@ tasks:
       - git switch main
       - gh pr merge $(gh pr list | grep "^[^#;]" | awk '{print $1}') --auto --rebase --delete-branch
       - git pull && git pull --tags
-
   release:
     desc: Create a release
     cmds:
@@ -185,6 +169,3 @@ tasks:
       - helm push {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz oci://{{ .REGISTRY }}/{{ .REPOSITORY_NAME }}
       - rm -rf {{ .PROJECT_NAME }}-{{ .TAG_VERSION }}.tgz
       - task: git-push
-    vars:
-      REGISTRY: eu.gcr.io
-      REPOSITORY_NAME: stuttgart-things
